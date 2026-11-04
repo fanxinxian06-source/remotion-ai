@@ -1,0 +1,73 @@
+import assert from 'node:assert/strict';
+import { readFile, stat } from 'node:fs/promises';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+
+const pagePath = new URL('./index.html', import.meta.url);
+const html = await readFile(pagePath, 'utf8');
+const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
+const moduleScripts = [...html.matchAll(/<script\s+type="module"\s+src="([^"]+)"\s*>\s*<\/script>/gi)];
+assert.equal(inlineScripts.length, 1, 'page should keep one inline app script');
+assert.equal(moduleScripts.length, 1, 'page should load one dedicated vision module');
+new vm.Script(inlineScripts[0][1], { filename: fileURLToPath(pagePath) });
+const visionPath = new URL(moduleScripts[0][1], pagePath);
+const vision = await readFile(visionPath, 'utf8');
+
+const dictMatch = inlineScripts[0][1].match(/const I=(\{[\s\S]*?\n\});/);
+assert.ok(dictMatch, 'translation dictionaries should be defined');
+const dictionaries = vm.runInNewContext(`(${dictMatch[1]})`);
+for (const [, locale, extra] of inlineScripts[0][1].matchAll(/Object\.assign\(I\.(zh|en|ko),(\{.*?\})\);/g)) {
+  Object.assign(dictionaries[locale], vm.runInNewContext(`(${extra})`));
+}
+assert.deepEqual(Object.keys(dictionaries).sort(), ['en', 'ko', 'zh']);
+const referenceKeys = Object.keys(dictionaries.zh).sort();
+for (const locale of ['en', 'ko']) {
+  assert.deepEqual(Object.keys(dictionaries[locale]).sort(), referenceKeys, `${locale} translation keys must match Chinese`);
+}
+const referencedKeys = new Set([
+  ...[...html.matchAll(/data-i="([^"]+)"/g)].map(m => m[1]),
+  ...[...inlineScripts[0][1].matchAll(/tr\('([^']+)'\)/g)].map(m => m[1]),
+  ...[...vision.matchAll(/translate\('([^']+)'\)/g)].map(m => m[1]),
+]);
+for (const key of referencedKeys) assert.ok(dictionaries.zh[key], `missing Chinese string: ${key}`);
+
+const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
+assert.equal(ids.length, new Set(ids).size, 'HTML IDs must be unique');
+const idSet = new Set(ids);
+for (const [, id] of [...inlineScripts[0][1].matchAll(/\$\('#([^']+)'\)/g), ...vision.matchAll(/\$\('([^']+)'\)/g)]) {
+  assert.ok(idSet.has(id), `script references missing element #${id}`);
+}
+assert.equal((html.match(/<meta name="viewport"/g) || []).length, 1);
+assert.ok(!/\b(XMLHttpRequest|WebSocket|EventSource|navigator\.bluetooth|requestDevice\s*\(|localStorage|sessionStorage)\b/i.test(`${html}\n${vision}`), 'no upload, persistence, or unrelated device APIs');
+assert.ok(!/<(?:img|iframe|audio)[^>]+(?:src|srcset)=/i.test(html), 'no external media embeds');
+assert.ok(!/fetch\s*\(/i.test(vision), 'app code must not upload video frames');
+assert.ok(/navigator\.mediaDevices\.getUserMedia/.test(vision), 'camera is requested by the vision module');
+assert.ok(/startButton\.addEventListener\('click',[\s\S]*?startVision\(\)/.test(vision), 'start button launches camera inference');
+assert.ok(/track\.stop\(\)/.test(vision) && /releaseModels\(\)/.test(vision), 'stop releases camera tracks and models');
+assert.ok(/PoseLandmarker\.createFromOptions/.test(vision) && /detectForVideo/.test(vision), 'MediaPipe pose runs on video frames');
+assert.ok(/FaceDetector\.createFromOptions/.test(vision) && /FACE_NEAR_RATIO/.test(vision), 'face proximity is an anonymous screen-size heuristic');
+assert.ok(!/FaceRecognizer|face.?embedding|identity.?match/i.test(vision), 'no face identity recognition');
+for (const model of ['yolox_nano.onnx', 'pose_landmarker_lite.task', 'blaze_face_short_range.tflite']) {
+  const info = await stat(new URL(`./models/${model}`, import.meta.url));
+  assert.ok(info.size > 100_000, `model file ${model} must be present and non-empty`);
+}
+for (const token of ['normal', 'heat', 'missing']) assert.ok(inlineScripts[0][1].includes(`'${token}'`), `scenario ${token} is wired`);
+for (const token of ['missingNote', 'heatNote', 'normalNote', 'missingAlert', 'missingAlertDesc']) assert.ok(dictionaries.zh[token], `scenario copy ${token} exists`);
+assert.ok(/scenario==='missing'[\s\S]*?qualityPoor/.test(inlineScripts[0][1]), 'missing signal maps metrics to unavailable');
+assert.ok(/scenario==='missing'[\s\S]*?id:4,level:'info'/.test(inlineScripts[0][1]), 'missing signal creates a review prompt');
+assert.ok(/scenario==='heat'[\s\S]*?id:3,level:'high'/.test(inlineScripts[0][1]), 'heat scenario creates a conservative review prompt');
+assert.ok(/a\.ack=true/.test(inlineScripts[0][1]) && /alerts=alerts\.filter/.test(inlineScripts[0][1]), 'acknowledge and resolve actions are wired');
+assert.ok(/<button[^>]+id="watchConnect"[^>]+aria-haspopup="dialog"/.test(html) && /\$\('#watchConnect'\)\.onclick=showModal/.test(inlineScripts[0][1]), 'device connection indicator opens the simulator');
+assert.ok(/@keyframes signalPulse/.test(html) && /@keyframes packet/.test(html), 'online indicators and data-path packets animate');
+assert.ok(html.includes('aria-live="polite"') && html.includes('role="dialog"'), 'dynamic updates and scenario dialog expose accessibility roles');
+assert.ok(html.includes('@media(max-width:700px)') && html.includes('prefers-reduced-motion:reduce'), 'mobile and reduced-motion styles exist');
+for (const id of ['story', 'console', 'principles']) assert.ok(idSet.has(id), `contest story section #${id} exists`);
+assert.ok(html.includes('href="#console"') && html.includes('href="#principles"'), 'hero calls to action navigate to the live demo and principles');
+assert.ok(html.includes('class="side-nav"') && html.includes('href="#dataflow"') && html.includes("document.querySelector('.flow').id='dataflow'"), 'desktop/mobile navigation reaches overview, sessions, edge data, and safety sections');
+for (const key of ['navOverview', 'navSessions', 'navEdge', 'navSafety']) assert.ok(dictionaries.zh[key], `navigation copy ${key} exists`);
+assert.ok(/\.side-nav\{position:fixed/.test(html) && /@media\(max-width:700px\)\{\.side-nav\{top:auto;bottom:0/.test(html), 'navigation adapts from desktop rail to mobile bottom bar');
+assert.ok(html.includes('hero-art') && html.includes('principle-grid'), 'hero visual and design-principle narrative exist');
+
+console.log(`PASS: app script parses; ${referenceKeys.length} translations match across 3 languages; ${ids.length} unique IDs; contest narrative, responsive navigation, camera controls, local models, privacy boundaries, scenario safeguards and accessibility checked.`);
+
+
