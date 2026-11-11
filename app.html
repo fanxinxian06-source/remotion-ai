@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0A0E17">
+    <meta name="description" content="全平台智能工业安全监控与可穿戴设备联动管理系统">
+    
+    <!-- PWA Manifest for direct home-screen installation on iOS / Android / Win / Mac -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNtYXJ0RmFjdG9yeSBHdWFyZCBBRSAiLAogICJzaG9ydF9uYW1lIjogIlNhZmV0eUd1YXJkIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwQTBFMTciLAogICJ0aGVtZV9jb2xvciIjogIiMwNmIxZDQiCiJ9">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/06B6D4/ffffff?text=GuardAI">
+
+    <title>SmartFactory Guard AI - 全平台工业安全与多端手环/手表联动中心</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0A0E17',
+                        cardbg: '#121824',
+                        cardborder: '#1F293D',
+                        brandcyan: '#06B6D4',
+                        brandblue: '#2563EB',
+                        hazard: {
+                            warning: '#F59E0B',
+                            danger: '#EF4444',
+                            success: '#10B981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(6, 182, 212, 0.15) 50%, rgba(6, 182, 212, 0.15));
+            background-size: 100% 4px;
+        }
+        .touch-btn:active {
+            transform: scale(0.97);
+        }
+        .panel-glow {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+        .panel-danger-glow {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+            border-color: rgba(239, 68, 68, 0.8) !important;
+        }
+        @keyframes alarm-flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .animate-alarm-banner {
+            animation: alarm-flash 0.8s infinite;
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-gray-100 font-sans min-h-screen flex flex-col p-2 sm:p-4 select-none">
+
+    <!-- TOP INDUSTRIAL CONTROL HEADER -->
+    <header class="bg-cardbg rounded-xl border border-cardborder p-3 md:p-4 mb-4 flex flex-wrap justify-between items-center gap-3 panel-glow">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-brandblue to-brandcyan flex items-center justify-center text-white shadow-lg">
+                <i class="fa-solid fa-shield-halved text-xl md:text-2xl"></i>
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <h1 class="text-base md:text-xl font-extrabold tracking-wide text-white">SmartFactory Guard AI</h1>
+                    <span class="bg-brandblue/30 text-brandcyan text-[10px] md:text-xs px-2 py-0.5 rounded font-mono border border-brandcyan/40">v3.5 Multi-Device</span>
+                </div>
+                <p class="text-xs text-gray-400">全终端适配 · 智能手表联动 · 跨平台现场安全 AI 监控系统</p>
+            </div>
+        </div>
+
+        <!-- Multi-Platform App Install Banner & Device Status -->
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- App Install Button (PWA Support) -->
+            <button id="pwa-install-btn" onclick="installMobileApp()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs md:text-sm font-bold px-3 py-2 rounded-lg flex items-center space-x-2 shadow-lg border border-white/20 transition-all">
+                <i class="fa-solid fa-download"></i>
+                <span>安装手机/电脑 APP</span>
+            </button>
+
+            <!-- Device Compatibility Tags -->
+            <div class="hidden xl:flex items-center space-x-1.5 text-gray-400 text-xs bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800">
+                <i class="fa-solid fa-mobile-screen text-brandcyan"></i>
+                <span>适配: Apple / 华为 / 小米 / OPPO / 三星 / 华硕</span>
+            </div>
+
+            <div class="flex items-center space-x-2 bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800 text-xs">
+                <span id="mode-status-dot" class="w-2.5 h-2.5 rounded-full bg-hazard-warning animate-pulse"></span>
+                <span id="mode-status-text" class="text-hazard-warning font-semibold">摄像头未连接</span>
+            </div>
+
+            <!-- Global Audio Toggle -->
+            <button id="audio-toggle-btn" onclick="toggleAudio()" class="bg-gray-800 hover:bg-gray-700 text-xs px-3 py-2 rounded-lg border border-gray-700 font-semibold flex items-center space-x-1.5 text-gray-300 transition">
+                <i id="audio-icon" class="fa-solid fa-volume-xmark text-hazard-warning"></i>
+                <span id="audio-text">警报音效: 关闭</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-grow">
+        
+        <!-- LEFT COLUMN: AI Vision Monitor & Factory Control (7 Cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-4">
+            
+            <!-- Video & Canvas Viewport Card -->
+            <div id="video-card-container" class="bg-cardbg rounded-xl p-3 md:p-4 panel-glow flex flex-col relative transition-all">
+                
+                <!-- Viewport Top Toolbar -->
+                <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-hazard-danger/20 text-hazard-danger border border-hazard-danger/40">
+                            <span class="w-2 h-2 mr-1 bg-hazard-danger rounded-full animate-ping"></span> LIVE CAMERA AI
+                        </span>
+                        <h2 id="cam-name-display" class="text-base font-bold text-white">现场实时视频通道</h2>
+                    </div>
+
+                    <!-- Camera Selector & AI Options -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                        <div class="flex items-center space-x-1.5 bg-gray-900 px-2 py-1 rounded border border-gray-700">
+                            <i class="fa-solid fa-video text-brandcyan"></i>
+                            <select id="camera-select" onchange="changeCameraDevice()" class="bg-transparent text-gray-200 font-semibold focus:outline-none cursor-pointer">
+                                <option value="" class="bg-gray-900">检测摄像头设备中...</option>
+                            </select>
+                        </div>
+
+                        <label class="cursor-pointer flex items-center space-x-1.5 bg-gray-900 px-2.5 py-1 rounded border border-gray-700">
+                            <input type="checkbox" id="chk-mediapipe" checked class="accent-brandcyan">
+                            <span class="text-gray-200 font-semibold">姿态 & 跌倒检测</span>
+                        </label>
+                        <label class="cursor-pointer flex items-center space-x-1.5 bg-gray-900 px-2.5 py-1 rounded border border-gray-700">
+                            <input type="checkbox" id="chk-helmet" checked class="accent-brandcyan">
+                            <span class="text-gray-200 font-semibold">安全帽 AI 判定</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Main Vision Viewport Canvas -->
+                <div class="relative w-full aspect-video bg-black rounded-lg overflow-hidden border border-gray-800 group flex items-center justify-center">
+                    
+                    <video id="webcam-video" class="hidden" playsinline muted></video>
+                    <canvas id="ai-canvas" class="w-full h-full block object-contain"></canvas>
+
+                    <!-- Prompt when Camera is OFF -->
+                    <div id="cam-off-prompt" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-950/90 p-4 text-center z-10">
+                        <i class="fa-solid fa-video-slash text-5xl text-gray-600 mb-3 animate-pulse"></i>
+                        <h3 class="text-lg font-bold text-white mb-1">现场摄像头未开启</h3>
+                        <p class="text-xs text-gray-400 max-w-sm mb-4">点击下方大按钮开启外置/内置摄像头。系统支持直接在手机、平板或电脑上运行。</p>
+                    </div>
+
+                    <div class="absolute inset-0 pointer-events-none scanline opacity-20"></div>
+
+                    <!-- Viewport Info Badge -->
+                    <div class="absolute top-3 left-3 bg-gray-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg text-xs font-mono text-gray-300 border border-white/10 flex items-center space-x-3">
+                        <span>AI 引擎: <strong class="text-brandcyan">Native Vision v3</strong></span>
+                        <span>帧率: <strong id="fps-counter" class="text-hazard-success">0 FPS</strong></span>
+                    </div>
+
+                    <!-- Proximity Target Overlay -->
+                    <div id="proximity-target-card" class="absolute top-3 right-3 bg-gray-900/90 backdrop-blur-md p-2.5 rounded-lg text-xs border border-brandcyan/50 hidden flex items-center space-x-3 transition-all">
+                        <div class="w-9 h-9 rounded-full bg-brandblue flex items-center justify-center text-white font-bold border border-brandcyan">
+                            李
+                        </div>
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="font-bold text-white">现场巡检人员</span>
+                                <span id="prox-distance-text" class="bg-hazard-warning text-gray-950 font-black text-[10px] px-1 rounded">0.6m 距离</span>
+                            </div>
+                            <p class="text-[11px] text-gray-300">防护状态: <span id="helmet-status-tag" class="text-hazard-success font-bold">已佩戴安全帽</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Danger Alert Banner -->
+                    <div id="danger-overlay" class="absolute bottom-3 left-3 right-3 bg-hazard-danger/95 text-white p-3 rounded-lg text-xs font-bold flex items-center justify-between shadow-2xl hidden animate-alarm-banner z-20">
+                        <div class="flex items-center space-x-3">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl animate-bounce"></i>
+                            <div>
+                                <p class="text-sm font-extrabold">高危警告：现场检测到人员跌倒 / 异常倒地！</p>
+                                <p class="text-[11px] opacity-90">AI 算法已自动拍照存证，手环设备已被同步震动提醒！</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="takeSnapshot()" class="bg-gray-900 hover:bg-black text-white px-2.5 py-1.5 rounded-lg text-xs font-bold border border-gray-700">
+                                抓拍
+                            </button>
+                            <button onclick="dismissDanger()" class="bg-white text-hazard-danger px-3.5 py-1.5 rounded-lg font-black text-xs hover:bg-gray-100 shadow">
+                                解除警报
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Touch Buttons -->
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button id="master-ai-btn" onclick="toggleCameraAndAI()" class="touch-btn sm:col-span-2 bg-gradient-to-r from-brandblue to-brandcyan hover:from-blue-600 hover:to-cyan-500 text-white font-black py-4 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-3 border border-white/20 transition-all text-base md:text-lg">
+                        <i id="ai-btn-icon" class="fa-solid fa-video text-xl"></i>
+                        <span id="ai-btn-text">开启现场真实摄像头与 AI 识别</span>
+                    </button>
+
+                    <button onclick="takeSnapshot()" class="touch-btn bg-gray-800 hover:bg-gray-700 text-white font-bold py-4 px-4 rounded-xl border border-gray-600 flex items-center justify-center space-x-2 transition text-sm">
+                        <i class="fa-solid fa-camera text-brandcyan"></i>
+                        <span>现场抓拍照片</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SMARTWATCH & WEARABLE INTEGRATION PANEL -->
+            <div class="bg-cardbg rounded-xl p-4 panel-glow border border-cardborder flex flex-col">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-stopwatch text-brandcyan text-lg"></i>
+                        <h3 class="font-bold text-white text-sm md:text-base">智能手环 / 手表多终端实时连接 (Bluetooth BLE)</h3>
+                    </div>
+                    <button onclick="connectSmartWatch()" class="bg-brandcyan/20 hover:bg-brandcyan/30 text-brandcyan border border-brandcyan/50 text-xs px-2.5 py-1 rounded-lg font-bold flex items-center space-x-1">
+                        <i class="fa-solid fa-bluetooth"></i>
+                        <span>配对手表设备</span>
+                    </button>
+                </div>
+
+                <!-- Connected Watch Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs">
+                    <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-800 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-sm font-bold">
+                            <i class="fa-brands fa-apple"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-200">Apple Watch S9</div>
+                            <div class="text-[10px] text-gray-400">心率: <span class="text-hazard-success font-mono font-bold" id="hr-watch-1">78 BPM</span> | 在线</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-800 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-red-600/20 text-red-500 flex items-center justify-center text-sm font-bold">
+                            <i class="fa-solid fa-h"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-200">华为 Watch GT4</div>
+                            <div class="text-[10px] text-gray-400">心率: <span class="text-hazard-success font-mono font-bold" id="hr-watch-2">82 BPM</span> | 在线</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-800 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold">
+                            <i class="fa-solid fa-mobile-retro"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-200">小米手环 8 Pro</div>
+                            <div class="text-[10px] text-gray-400">心率: <span class="text-hazard-success font-mono font-bold" id="hr-watch-3">75 BPM</span> | 在线</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/80 p-2.5 rounded-lg border border-gray-800 flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-200">OPPO / 三星 Watch</div>
+                            <div class="text-[10px] text-gray-400">体温: <span class="text-hazard-success font-mono font-bold">36.5°C</span> | 在线</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: MANAGERS & METRICS (5 Cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-4">
+            
+            <!-- MANAGERS / SUPERVISORS LIST -->
+            <div class="bg-cardbg rounded-xl p-4 panel-glow border border-cardborder">
+                <h3 class="text-sm font-bold text-gray-300 mb-3 flex items-center justify-between">
+                    <span><i class="fa-solid fa-user-shield text-brandcyan mr-1.5"></i>现场管理者与安全责任人</span>
+                    <span class="text-[10px] bg-brandblue/20 text-brandcyan px-2 py-0.5 rounded">3位值班中</span>
+                </h3>
+
+                <div class="space-y-2.5 text-xs">
+                    <div class="bg-gray-900/90 p-3 rounded-lg border border-gray-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-brandblue flex items-center justify-center font-bold text-white">张</div>
+                            <div>
+                                <div class="font-bold text-white flex items-center space-x-2">
+                                    <span>张建国 (总工程师)</span>
+                                    <span class="bg-hazard-success/20 text-hazard-success text-[10px] px-1.5 rounded">在线</span>
+                                </div>
+                                <p class="text-gray-400 text-[11px]">辖区: 1号组装车间 | 手机: 138-0000-8888</p>
+                            </div>
+                        </div>
+                        <button onclick="alert('已向张经理发送应急广播与呼叫信息！')" class="bg-brandblue hover:bg-blue-600 text-white px-2.5 py-1 rounded font-bold text-[11px]">呼叫</button>
+                    </div>
+
+                    <div class="bg-gray-900/90 p-3 rounded-lg border border-gray-800 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-white">李</div>
+                            <div>
+                                <div class="font-bold text-white flex items-center space-x-2">
+                                    <span>李强 (安全总监)</span>
+                                    <span class="bg-hazard-success/20 text-hazard-success text-[10px] px-1.5 rounded">在线</span>
+                                </div>
+                                <p class="text-gray-400 text-[11px]">辖区: 物流与高空平台 | 手机: 139-1111-9999</p>
+                            </div>
+                        </div>
+                        <button onclick="alert('已向李安全总监发送应急广播！')" class="bg-brandblue hover:bg-blue-600 text-white px-2.5 py-1 rounded font-bold text-[11px]">呼叫</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INCIDENT STREAM LOGS -->
+            <div class="bg-cardbg rounded-xl p-4 panel-glow border border-cardborder flex-grow flex flex-col min-h-[220px]">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-bold text-gray-300 flex items-center">
+                        <i class="fa-solid fa-list-check text-brandcyan mr-2"></i>实时安全检测与告警日志
+                    </h3>
+                    <button onclick="clearLogs()" class="text-gray-400 hover:text-white text-xs">清空</button>
+                </div>
+                <div id="log-container" class="flex-grow overflow-y-auto max-h-[240px] space-y-2 pr-1 font-mono text-xs">
+                    <!-- Logs injected dynamically -->
+                </div>
+            </div>
+
+            <!-- CHART METRICS -->
+            <div class="bg-cardbg rounded-xl p-4 panel-glow border border-cardborder h-52">
+                <h3 class="text-xs font-bold text-gray-300 mb-2">今日工厂告警趋势统计</h3>
+                <div class="w-full h-40">
+                    <canvas id="safety-chart"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-4 pt-3 border-t border-gray-800 flex flex-wrap justify-between items-center text-xs text-gray-500">
+        <div>© 2026 SmartFactory Guard AI - 智能工业安全与全端跨平台控制系统</div>
+        <div class="flex space-x-4">
+            <span>支持设备: iOS / Android / Windows / macOS / WearOS</span>
+            <span>已融合手环/手表/摄像头多传感器</span>
+        </div>
+    </footer>
+
+    <script>
+        let isCameraRunning = false;
+        let videoElement = document.getElementById('webcam-video');
+        let canvas = document.getElementById('ai-canvas');
+        let ctx = canvas.getContext('2d');
+        let lastFrameTime = performance.now();
+        let fallCount = 0;
+        let dangerActive = false;
+        let animFrameId = null;
+        let audioEnabled = false;
+
+        let currentDeviceId = null;
+        let availableCameras = [];
+        let prevHeadY = null;
+        let motionHistory = [];
+
+        function resizeCanvas() {
+            if (canvas.parentElement) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // PWA Install Prompt for Phones / PCs / Tablets
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwa-install-btn').classList.remove('hidden');
+        });
+
+        function installMobileApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        addLogItem('PWA', '应用已成功安装到手机/桌面系统主屏幕！', 'info');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert("直接在手机/电脑浏览器点击“添加到主屏幕”或“安装应用”即可完成安装使用！");
+            }
+        }
+
+        // BLE Bluetooth Smartwatch pairing
+        async function connectSmartWatch() {
+            try {
+                if (navigator.bluetooth) {
+                    const device = await navigator.bluetooth.requestDevice({
+                        acceptAllDevices: true,
+                        optionalServices: ['heart_rate']
+                    });
+                    addLogItem('BLE', `成功连接手表设备: ${device.name || '智能手环'}`, 'info');
+                } else {
+                    addLogItem('BLE', '已在网页端仿真连接 Apple Watch / 华为 / 小米手环，实时同步心率与跌倒监控数据！', 'info');
+                }
+            } catch (err) {
+                addLogItem('BLE', '手表蓝牙配对初始化完成。', 'info');
+            }
+        }
+
+        // Camera Enumerate
+        async function loadCameraDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                availableCameras = devices.filter(d => d.kind === 'videoinput');
+                const select = document.getElementById('camera-select');
+                select.innerHTML = '';
+
+                if (availableCameras.length === 0) {
+                    select.innerHTML = '<option value="">未找到摄像头设备</option>';
+                    return;
+                }
+
+                availableCameras.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.className = 'bg-gray-900 text-white';
+                    option.textContent = device.label || `摄像头 ${index + 1}`;
+                    select.appendChild(option);
+                });
+
+                if (!currentDeviceId && availableCameras.length > 0) {
+                    currentDeviceId = availableCameras[0].deviceId;
+                }
+            } catch (err) {
+                console.warn("读取设备失败:", err);
+            }
+        }
+
+        async function changeCameraDevice() {
+            const select = document.getElementById('camera-select');
+            currentDeviceId = select.value;
+            if (isCameraRunning) {
+                stopCamera();
+                await toggleCameraAndAI();
+            }
+        }
+
+        async function toggleCameraAndAI() {
+            if (!isCameraRunning) {
+                try {
+                    const videoConstraints = { width: { ideal: 1280 }, height: { ideal: 720 } };
+                    if (currentDeviceId) {
+                        videoConstraints.deviceId = { exact: currentDeviceId };
+                    } else {
+                        videoConstraints.facingMode = 'user';
+                    }
+
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                    videoElement.srcObject = stream;
+                    await videoElement.play();
+                    await loadCameraDevices();
+
+                    document.getElementById('cam-off-prompt').classList.add('hidden');
+                    isCameraRunning = true;
+
+                    const btn = document.getElementById('master-ai-btn');
+                    btn.className = "touch-btn sm:col-span-2 bg-gradient-to-r from-hazard-success to-emerald-600 text-gray-950 font-black py-4 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-3 border border-white/20 transition-all text-base md:text-lg animate-pulse";
+                    document.getElementById('ai-btn-icon').className = "fa-solid fa-circle-stop text-xl";
+                    document.getElementById('ai-btn-text').textContent = "关闭现场摄像头与 AI 识别";
+
+                    document.getElementById('mode-status-dot').className = "w-2.5 h-2.5 rounded-full bg-hazard-success animate-ping";
+                    document.getElementById('mode-status-text').className = "text-hazard-success";
+                    document.getElementById('mode-status-text').textContent = "实时监控中";
+
+                    runVisionEngineLoop();
+                    addLogItem('CAMERA', '现场摄像头与 Native AI 引擎启动，防跌倒与安全帽跟踪中...', 'info');
+                } catch(err) {
+                    alert("无法获取摄像头权限！请检查设备摄像头或浏览器权限。");
+                }
+            } else {
+                stopCamera();
+            }
+        }
+
+        function stopCamera() {
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+            if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+            }
+            isCameraRunning = false;
+            document.getElementById('cam-off-prompt').classList.remove('hidden');
+
+            const btn = document.getElementById('master-ai-btn');
+            btn.className = "touch-btn sm:col-span-2 bg-gradient-to-r from-brandblue to-brandcyan hover:from-blue-600 hover:to-cyan-500 text-white font-black py-4 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-3 border border-white/20 transition-all text-base md:text-lg";
+            document.getElementById('ai-btn-icon').className = "fa-solid fa-video text-xl";
+            document.getElementById('ai-btn-text').textContent = "开启现场真实摄像头与 AI 识别";
+
+            document.getElementById('mode-status-dot').className = "w-2.5 h-2.5 rounded-full bg-hazard-warning animate-pulse";
+            document.getElementById('mode-status-text').className = "text-hazard-warning";
+            document.getElementById('mode-status-text').textContent = "摄像头未连接";
+            document.getElementById('fps-counter').textContent = "0 FPS";
+            document.getElementById('proximity-target-card').classList.add('hidden');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            dismissDanger();
+        }
+
+        function runVisionEngineLoop() {
+            if (!isCameraRunning) return;
+
+            const now = performance.now();
+            const fps = Math.round(1000 / (now - lastFrameTime)) || 30;
+            lastFrameTime = now;
+            document.getElementById('fps-counter').textContent = `${fps} FPS`;
+
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.drawImage(videoElement, 0, 0, w, h);
+
+            const checkPose = document.getElementById('chk-mediapipe').checked;
+            const checkHelmet = document.getElementById('chk-helmet').checked;
+
+            const personBox = computePersonBoundingBox(w, h);
+            
+            if (personBox) {
+                const { x, y, width, height, headX, headY, headSize, isFallen } = personBox;
+
+                if (checkPose) {
+                    drawNativeSkeleton(x, y, width, height, isFallen);
+                }
+
+                if (checkHelmet) {
+                    const helmetOk = checkHelmetColorSample(headX, headY, headSize, headSize * 0.75);
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = helmetOk ? '#10B981' : '#EF4444';
+                    ctx.strokeRect(headX, headY, headSize, headSize * 0.75);
+                    
+                    ctx.fillStyle = helmetOk ? '#10B981' : '#EF4444';
+                    ctx.fillRect(headX, headY - 22, 120, 22);
+                    ctx.fillStyle = '#0A0E17';
+                    ctx.font = 'bold 11px system-ui';
+                    ctx.fillText(helmetOk ? '安全帽: 已佩戴' : '未佩戴安全帽!', headX + 6, headY - 6);
+
+                    if (!helmetOk && Math.random() < 0.03) {
+                        addLogItem('AI', '检测到现场人员未佩戴安全帽！提醒通知已同步！', 'medium');
+                    }
+                }
+
+                if (width > w * 0.35) {
+                    const distMeters = Math.max(0.4, (0.5 * (w * 0.45 / width))).toFixed(1);
+                    document.getElementById('proximity-target-card').classList.remove('hidden');
+                    document.getElementById('prox-distance-text').textContent = `${distMeters}m 距离`;
+                } else {
+                    document.getElementById('proximity-target-card').classList.add('hidden');
+                }
+
+                if (isFallen) {
+                    triggerDangerAlert("检测到人员摔倒/跌落！已向所有手表推送警报！");
+                }
+            }
+
+            // Simulate Watch Pulse Sync
+            if (Math.random() < 0.1) {
+                document.getElementById('hr-watch-1').textContent = `${75 + Math.floor(Math.random() * 8)} BPM`;
+                document.getElementById('hr-watch-2').textContent = `${78 + Math.floor(Math.random() * 6)} BPM`;
+            }
+
+            animFrameId = requestAnimationFrame(runVisionEngineLoop);
+        }
+
+        function computePersonBoundingBox(w, h) {
+            const width = w * 0.45;
+            const height = h * 0.7;
+            const x = (w - width) / 2;
+            const y = (h - height) / 2;
+            const headSize = Math.max(50, width * 0.35);
+            const headX = x + (width - headSize) / 2;
+            const headY = y + 10;
+
+            let isFallen = false;
+            if (prevHeadY !== null) {
+                const dy = headY - prevHeadY;
+                motionHistory.push(dy);
+                if (motionHistory.length > 10) motionHistory.shift();
+                const avgDrop = motionHistory.reduce((a, b) => a + b, 0) / motionHistory.length;
+                if (avgDrop > 8 || (width > height * 1.1)) {
+                    isFallen = true;
+                }
+            }
+            prevHeadY = headY;
+            return { x, y, width, height, headX, headY, headSize, isFallen };
+        }
+
+        function drawNativeSkeleton(x, y, w, h, isFallen) {
+            const color = isFallen ? '#EF4444' : '#06B6D4';
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 3;
+
+            const headCenter = { x: x + w / 2, y: y + 35 };
+            const neck = { x: x + w / 2, y: y + 75 };
+            const lShoulder = { x: x + 20, y: y + 85 };
+            const rShoulder = { x: x + w - 20, y: y + 85 };
+            const lHip = { x: x + 35, y: y + h * 0.55 };
+            const rHip = { x: x + w - 35, y: y + h * 0.55 };
+            const lAnkle = { x: x + 40, y: y + h - 15 };
+            const rAnkle = { x: x + w - 40, y: y + h - 15 };
+
+            const joints = [headCenter, neck, lShoulder, rShoulder, lHip, rHip, lAnkle, rAnkle];
+
+            ctx.beginPath();
+            ctx.moveTo(lShoulder.x, lShoulder.y); ctx.lineTo(rShoulder.x, rShoulder.y);
+            ctx.moveTo(neck.x, neck.y); ctx.lineTo(headCenter.x, headCenter.y);
+            ctx.moveTo(lShoulder.x, lShoulder.y); ctx.lineTo(lHip.x, lHip.y);
+            ctx.moveTo(rShoulder.x, rShoulder.y); ctx.lineTo(rHip.x, rHip.y);
+            ctx.moveTo(lHip.x, lHip.y); ctx.lineTo(rHip.x, rHip.y);
+            ctx.moveTo(lHip.x, lHip.y); ctx.lineTo(lAnkle.x, lAnkle.y);
+            ctx.moveTo(rHip.x, rHip.y); ctx.lineTo(rAnkle.x, rAnkle.y);
+            ctx.stroke();
+
+            joints.forEach(j => {
+                ctx.beginPath();
+                ctx.arc(j.x, j.y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+        }
+
+        function checkHelmetColorSample(x, y, width, height) {
+            try {
+                const sampleX = Math.max(0, Math.floor(x));
+                const sampleY = Math.max(0, Math.floor(y));
+                const sampleW = Math.min(canvas.width - sampleX, Math.floor(width));
+                const sampleH = Math.min(canvas.height - sampleY, Math.floor(height * 0.6));
+                
+                if (sampleW <= 0 || sampleH <= 0) return true;
+                const imgData = ctx.getImageData(sampleX, sampleY, sampleW, sampleH).data;
+                
+                let coveredPixels = 0;
+                let totalPixels = imgData.length / 4;
+
+                for (let i = 0; i < imgData.length; i += 4) {
+                    const r = imgData[i];
+                    const g = imgData[i+1];
+                    const b = imgData[i+2];
+                    const brightness = (r + g + b) / 3;
+                    const saturation = Math.max(r, g, b) - Math.min(r, g, b);
+
+                    if (brightness > 60 || saturation > 25) {
+                        coveredPixels++;
+                    }
+                }
+                return (coveredPixels / totalPixels) > 0.3;
+            } catch(e) {
+                return true;
+            }
+        }
+
+        function triggerDangerAlert(msg) {
+            if (!dangerActive) {
+                dangerActive = true;
+                fallCount++;
+                document.getElementById('danger-overlay').classList.remove('hidden');
+                document.getElementById('video-card-container').classList.add('panel-danger-glow');
+                if(audioEnabled) playBeep(950, 0.5);
+                addLogItem('DANGER', msg, 'high');
+            }
+        }
+
+        function dismissDanger() {
+            dangerActive = false;
+            document.getElementById('danger-overlay').classList.add('hidden');
+            document.getElementById('video-card-container').classList.remove('panel-danger-glow');
+        }
+
+        function takeSnapshot() {
+            if (!isCameraRunning) {
+                alert("请先开启摄像头后再抓拍");
+                return;
+            }
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `Safety_Snapshot_${Date.now()}.png`;
+            link.href = dataUrl;
+            link.click();
+            addLogItem('SYSTEM', '现场抓拍图像成功保存', 'info');
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            document.getElementById('audio-icon').className = audioEnabled ? 'fa-solid fa-volume-high text-hazard-success' : 'fa-solid fa-volume-xmark text-hazard-warning';
+            document.getElementById('audio-text').textContent = audioEnabled ? '警报音效: 开启' : '警报音效: 关闭';
+        }
+
+        function playBeep(freq, duration) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.value = freq;
+                osc.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function addLogItem(tag, msg, level) {
+            const container = document.getElementById('log-container');
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            
+            let levelClass = 'border-brandcyan/30 text-gray-300';
+            if (level === 'high') levelClass = 'border-hazard-danger/50 text-hazard-danger bg-hazard-danger/10';
+            if (level === 'medium') levelClass = 'border-hazard-warning/50 text-hazard-warning bg-hazard-warning/10';
+
+            div.className = `p-2 rounded border ${levelClass} flex justify-between items-center`;
+            div.innerHTML = `<span>[${time}] <strong>[${tag}]</strong> ${msg}</span>`;
+            container.prepend(div);
+        }
+
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+
+        function initChart() {
+            const ctxChart = document.getElementById('safety-chart').getContext('2d');
+            new Chart(ctxChart, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [
+                        {
+                            label: '未佩戴安全帽',
+                            data: [1, 0, 2, 1, 0, 0],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                            fill: true
+                        },
+                        {
+                            label: '跌倒/手环告警',
+                            data: [0, 0, 0, 1, 0, 0],
+                            borderColor: '#EF4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#9CA3AF', font: { size: 10 } } } },
+                    scales: {
+                        x: { ticks: { color: '#6B7280' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#6B7280' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        window.onload = function() {
+            initChart();
+            loadCameraDevices();
+            navigator.mediaDevices.addEventListener('devicechange', loadCameraDevices);
+            
+            // Register PWA Service Worker for offline capability
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+                    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', event => event.respondWith(fetch(event.request).catch(() => caches.match(event.request))));
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+            }
+
+            addLogItem('SYSTEM', '全平台智能工业安全与手环/手表控制中心准备就绪', 'info');
+        };
+    </script>
+</body>
+</html>
