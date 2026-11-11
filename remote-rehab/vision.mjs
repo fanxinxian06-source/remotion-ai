@@ -5,6 +5,9 @@ const PERSON_CONFIDENCE = 0.35;
 const NMS_IOU = 0.45;
 const FACE_NEAR_RATIO = 0.20;
 const FRAME_INTERVAL_MS = 160;
+const PULSE_SAMPLE_INTERVAL_MS = 80;
+const PULSE_WINDOW_MS = 16000;
+const PULSE_MIN_DURATION_MS = 10000;
 const ORT_VERSION = '1.27.0';
 const MEDIAPIPE_VERSION = '0.10.32';
 
@@ -22,6 +25,13 @@ const faceState = $('visionFaceState');
 const faceMetric = faceState.parentElement;
 const peopleCount = $('visionPeopleCount');
 const engineEl = $('visionEngine');
+const facingSelect = $('visionFacing');
+const pulseValue = $('visionPulseValue');
+const pulseQuality = $('visionPulseQuality');
+const pulseCanvas = document.createElement('canvas');
+pulseCanvas.width = 16;
+pulseCanvas.height = 16;
+const pulseCtx = pulseCanvas.getContext('2d', { willReadFrequently: true });
 
 let running = false;
 let starting = false;
@@ -36,7 +46,13 @@ let lastInferenceAt = 0;
 let lastVideoTime = -1;
 let nextTrackId = 1;
 let tracks = [];
-
+let pulseFace = null;
+let pulseSamples = [];
+let lastPulseSampleAt = 0;
+let lastPulseVideoTime = -1;
+let lastPulseFace = null;
+let lastPulseBrightness = null;
+let smoothedPulse = null;
 
 const translate = (key) => (typeof window.appTr === 'function' ? window.appTr(key) : key);
 const text = (key, value) => { const el = $(key); if (el) el.textContent = value ?? translate(key); };
@@ -48,6 +64,7 @@ function setStatus(key) {
 
 function updateControls() {
   const active = starting || running;
+  facingSelect.disabled = active;
   startButton.setAttribute('aria-pressed', String(running));
   startLabel.dataset.i = active ? 'visionStop' : 'visionStart';
   startLabel.textContent = translate(active ? 'visionStop' : 'visionStart');
@@ -61,6 +78,7 @@ function refreshLocalizedState() {
   else if (starting) setStatus('visionLoading');
   else setStatus('visionOff');
   if (faceState.dataset.i) faceState.textContent = translate(faceState.dataset.i);
+  if (pulseQuality.dataset.i) pulseQuality.textContent = translate(pulseQuality.dataset.i);
   updateControls();
 }
 
@@ -230,6 +248,125 @@ function drawOverlay(boxes, poseResult, faces) {
   }
 }
 
+function showPulseQuality(key) {
+  pulseQuality.dataset.i = key;
+  pulseQuality.textContent = translate(key);
+}
+
+function resetPulse(key = 'visionPulseWaiting') {
+  pulseSamples = [];
+  lastPulseSampleAt = 0;
+  lastPulseVideoTime = -1;
+  lastPulseFace = null;
+  lastPulseBrightness = null;
+  smoothedPulse = null;
+  pulseValue.textContent = '—';
+  showPulseQuality(key);
+}
+
+function estimatePulse() {
+  const duration = pulseSamples.at(-1).time - pulseSamples[0].time;
+  if (duration < PULSE_MIN_DURATION_MS) {
+    showPulseQuality('visionPulseCollecting');
+    return;
+  }
+  if (pulseSamples.length < 90) {
+    showPulseQuality('visionPulsePoor');
+    return;
+  }
+  const sampleRate = (pulseSamples.length - 1) * 1000 / (pulseSamples.at(-1).time - pulseSamples[0].time);
+  const radius = Math.max(2, Math.round(sampleRate * 0.45));
+  const filtered = pulseSamples.map((sample, index) => {
+    const start = Math.max(0, index - radius);
+    const end = Math.min(pulseSamples.length, index + radius + 1);
+    let average = 0;
+    for (let i = start; i < end; i++) average += pulseSamples[i].green;
+    return sample.green - average / (end - start);
+  });
+  const variance = filtered.reduce((sum, value) => sum + value * value, 0) / filtered.length;
+  if (variance < 0.0064 || variance > 180) {
+    showPulseQuality('visionPulsePoor');
+    return;
+  }
+
+  const minLag = Math.max(2, Math.floor(sampleRate * 60 / 180));
+  const maxLag = Math.min(filtered.length / 2, Math.ceil(sampleRate * 60 / 45));
+  const correlations = [];
+  for (let lag = minLag; lag <= maxLag; lag++) {
+    let product = 0, leftEnergy = 0, rightEnergy = 0;
+    for (let i = lag; i < filtered.length; i++) {
+      const left = filtered[i], right = filtered[i - lag];
+      product += left * right;
+      leftEnergy += left * left;
+      rightEnergy += right * right;
+    }
+    correlations.push({ lag, value: product / Math.sqrt(leftEnergy * rightEnergy + 1e-9) });
+  }
+  const peaks = correlations.filter((entry, index) =>
+    entry.value > 0 && entry.value >= (correlations[index - 1]?.value ?? -1)
+      && entry.value >= (correlations[index + 1]?.value ?? -1),
+  ).sort((a, b) => b.value - a.value);
+  const best = peaks[0];
+  if (!best || best.value < 0.36) {
+    showPulseQuality('visionPulsePoor');
+    return;
+  }
+  const bpm = 60 * sampleRate / best.lag;
+  if (!Number.isFinite(bpm) || bpm < 45 || bpm > 180) {
+    showPulseQuality('visionPulsePoor');
+    return;
+  }
+  smoothedPulse = smoothedPulse === null ? bpm : smoothedPulse * 0.75 + bpm * 0.25;
+  pulseValue.textContent = `~${Math.round(smoothedPulse)} bpm`;
+  showPulseQuality('visionPulseEstimate');
+}
+
+function samplePulse(now) {
+  if (!pulseFace || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+    if (pulseSamples.length) resetPulse('visionPulseNoFace');
+    else showPulseQuality('visionPulseNoFace');
+    return;
+  }
+  if (video.currentTime === lastPulseVideoTime) {
+    if (now - lastPulseSampleAt > 1200 && pulseSamples.length) {
+      resetPulse('visionPulsePoor');
+      lastPulseVideoTime = video.currentTime;
+    }
+    return;
+  }
+  if (now - lastPulseSampleAt < PULSE_SAMPLE_INTERVAL_MS) return;
+  lastPulseSampleAt = now;
+  lastPulseVideoTime = video.currentTime;
+
+  const { originX, originY, width, height } = pulseFace;
+  const face = { x: originX + width / 2, y: originY + height / 2, width, height };
+  if (lastPulseFace) {
+    const moved = Math.hypot(face.x - lastPulseFace.x, face.y - lastPulseFace.y) / Math.max(face.width, lastPulseFace.width);
+    const resized = Math.abs(face.width - lastPulseFace.width) / lastPulseFace.width;
+    if (moved > 0.12 || resized > 0.16) resetPulse('visionPulsePoor');
+  }
+  lastPulseFace = face;
+
+  const x = originX + width * 0.20, y = originY + height * 0.24;
+  pulseCtx.drawImage(video, x, y, width * 0.60, height * 0.52, 0, 0, pulseCanvas.width, pulseCanvas.height);
+  const pixels = pulseCtx.getImageData(0, 0, pulseCanvas.width, pulseCanvas.height).data;
+  let green = 0, brightness = 0;
+  for (let i = 0; i < pixels.length; i += 4) {
+    green += pixels[i + 1];
+    brightness += (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+  }
+  green /= pixels.length / 4;
+  brightness /= pixels.length / 4;
+  if (brightness < 25 || brightness > 235 || (lastPulseBrightness !== null && Math.abs(brightness - lastPulseBrightness) > 18)) {
+    resetPulse('visionPulsePoor');
+    return;
+  }
+  lastPulseBrightness = brightness;
+  pulseSamples.push({ time: now, green });
+  while (pulseSamples.length && now - pulseSamples[0].time > PULSE_WINDOW_MS) pulseSamples.shift();
+  estimatePulse();
+}
+
 async function inferFrame(now) {
   const prep = preprocessFrame();
   const resultMap = await yoloSession.run({ [yoloSession.inputNames[0]]: prep.tensor });
@@ -238,6 +375,12 @@ async function inferFrame(now) {
   const poseResult = poseLandmarker.detectForVideo(video, now);
   const faceResult = faceDetector.detectForVideo(video, now);
   const faces = faceResult.detections || [];
+  const nearestFace = faces
+    .map((detection) => detection.boundingBox)
+    .filter((box) => box.width / video.videoWidth >= FACE_NEAR_RATIO)
+    .sort((a, b) => b.width - a.width)[0] || null;
+  if (!nearestFace && pulseFace) resetPulse('visionPulseNoFace');
+  pulseFace = nearestFace;
   drawOverlay(people, poseResult, faces);
   peopleCount.textContent = `${people.length}${people.length ? ` · ${people.map((p) => p.id).join(', ')}` : ''}`;
   const near = faces.some((d) => d.boundingBox.width / video.videoWidth >= FACE_NEAR_RATIO);
@@ -256,6 +399,12 @@ async function renderLoop(token) {
     finally { frameBusy = false; }
   }
   if (token === generation && running) requestAnimationFrame(() => renderLoop(token));
+}
+
+function pulseLoop(token) {
+  if (token !== generation || !running) return;
+  samplePulse(performance.now());
+  requestAnimationFrame(() => pulseLoop(token));
 }
 
 function stopMedia(streamToStop) {
@@ -277,6 +426,7 @@ function stopVision(errorKey = null) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   peopleCount.textContent = '—'; $('visionEngine').textContent = '—';
   faceState.dataset.i = 'visionFaceNone'; faceState.textContent = translate('visionFaceNone'); faceMetric.classList.remove('near');
+  pulseFace = null; resetPulse('visionPulseWaiting');
   consoleEl.classList.remove('is-live');
   errorEl.hidden = !errorKey;
   if (errorKey) errorEl.textContent = translate(errorKey);
@@ -292,9 +442,14 @@ async function startVision() {
     if (!navigator.mediaDevices?.getUserMedia) throw Object.assign(new Error('secure'), { code: 'secure' });
     cameraStream = await navigator.mediaDevices.getUserMedia({
       audio: false,
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 15, max: 24 } },
+      video: { facingMode: { ideal: facingSelect.value }, width: { ideal: 960 }, height: { ideal: 540 }, frameRate: { ideal: 30, max: 30 } },
     });
     if (token !== generation) { stopMedia(cameraStream); return; }
+    const actualFacing = cameraStream.getVideoTracks()[0]?.getSettings?.().facingMode;
+    if (actualFacing && actualFacing !== facingSelect.value) {
+      stopMedia(cameraStream);
+      throw Object.assign(new Error('facing-unsupported'), { code: 'facing-unsupported' });
+    }
     stream = cameraStream; video.srcObject = stream; await video.play();
     consoleEl.classList.add('is-live');
     setStatus('visionLoading'); updateControls();
@@ -305,11 +460,16 @@ async function startVision() {
     $('visionEngine').textContent = loaded.provider;
     running = true; starting = false; setStatus('visionRunning'); updateControls();
     requestAnimationFrame(() => renderLoop(token));
+    requestAnimationFrame(() => pulseLoop(token));
   } catch (error) {
     stopMedia(cameraStream);
     const key = error?.code === 'secure' ? 'visionSecureError'
+      : error?.code === 'facing-unsupported' || ((error?.name === 'OverconstrainedError' || error?.name === 'ConstraintNotSatisfiedError') && error?.constraint === 'facingMode') ? 'visionFacingUnsupported'
       : error?.name === 'NotAllowedError' ? 'visionCameraDenied'
       : error?.name === 'NotFoundError' ? 'visionCameraMissing'
+      : error?.name === 'NotReadableError' ? 'visionCameraBusy'
+      : error?.name === 'AbortError' ? 'visionCameraUnavailable'
+      : error?.name === 'OverconstrainedError' || error?.name === 'ConstraintNotSatisfiedError' ? 'visionCameraConstraint'
       : stream ? 'visionModelError' : 'visionCameraMissing';
     stopVision(key);
   }
@@ -321,4 +481,3 @@ startButton.addEventListener('click', () => {
 });
 stopButton.addEventListener('click', () => stopVision());
 updateControls();
-
