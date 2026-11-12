@@ -5,10 +5,11 @@ import { fileURLToPath } from 'node:url';
 
 const pagePath = new URL('./index.html', import.meta.url);
 const html = await readFile(pagePath, 'utf8');
-const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)];
-const moduleScripts = [...html.matchAll(/<script\s+type="module"\s+src="([^"]+)"\s*>\s*<\/script>/gi)];
+const inlineScripts = [...html.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*\btype="module")[^>]*>([\s\S]*?)<\/script>/gi)];
+const moduleScripts = [...html.matchAll(/<script\s+type="module"\s+src="([^"]+)"[^>]*>\s*<\/script>/gi)];
 assert.equal(inlineScripts.length, 1, 'page should keep one inline app script');
 assert.equal(moduleScripts.length, 1, 'page should load one dedicated vision module');
+assert.ok(/src="\.\/vision\.mjs"\s+onerror="window\.visionModuleLoadError\(\)"/.test(html), 'vision load errors should come from the module request, not a separate probe');
 new vm.Script(inlineScripts[0][1], { filename: fileURLToPath(pagePath) });
 const visionPath = new URL(moduleScripts[0][1], pagePath);
 const vision = await readFile(visionPath, 'utf8');
@@ -66,6 +67,7 @@ assert.ok(/PoseLandmarker\.createFromOptions/.test(vision) && /detectForVideo/.t
 assert.ok(/FaceDetector\.createFromOptions/.test(vision) && /FACE_NEAR_RATIO/.test(vision), 'face proximity is an anonymous screen-size heuristic');
 assert.ok(!/FaceRecognizer|face.?embedding|identity.?match/i.test(vision), 'no face identity recognition');
 for (const model of ['yolox_nano.onnx', 'pose_landmarker_lite.task', 'blaze_face_short_range.tflite']) {
+  assert.ok(vision.includes(`./models/${model}`), `vision module must load ${model} from the models folder`);
   const info = await stat(new URL(`./models/${model}`, import.meta.url));
   assert.ok(info.size > 100_000, `model file ${model} must be present and non-empty`);
 }

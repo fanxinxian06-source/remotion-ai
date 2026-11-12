@@ -277,10 +277,10 @@ function mgRender(A,rk,lv){const D=new Date().toDateString(),E=ind.live.filter(e
 function setMode(m){const r=m==='rehab';if(r&&stream)stopCam();$('#rehabView').hidden=!r;$('#indView').hidden=r;document.body.classList.toggle('mode-rehab',r);document.querySelectorAll('.modetab').forEach(b=>{const on=b.dataset.m===m;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)})}
 document.addEventListener('click',e=>{const t=e.target.closest('[data-m]');if(!t)return;setMode(t.dataset.m);const h=t.getAttribute('href');setTimeout(()=>{const x=h&&h[0]==='#'?document.querySelector(h):$('#modebar');x&&x.scrollIntoView()},50)});
 $('#visionBtn').addEventListener('click',()=>{setMode('ind');const d=$('#yoloBox');if(d){d.open=true;setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'center'}),80)}
-fetch('./vision.mjs',{method:'HEAD'}).then(r=>{if(!r.ok)throw 0}).catch(()=>{const l=document.documentElement.lang,m=l==='en'?'vision.mjs was not found next to index.html, so YOLO cannot start. Upload vision.mjs (and its model files) to the same folder.':l==='ko'?'index.html 옆에 vision.mjs가 없어 YOLO를 시작할 수 없습니다. vision.mjs와 모델 파일을 같은 폴더에 올려 주세요.':'在 index.html 同一文件夹里没找到 vision.mjs，YOLO 无法启动。请把 vision.mjs 及其模型文件一起上传。';alert(m)})});
+window.visionModuleLoadError=()=>{const l=document.documentElement.lang,m=l==='en'?'Could not load vision.mjs. Ensure it is next to index.html and the model files are in the models/ folder.':l==='ko'?'vision.mjs\ub97c \ubd88\ub7ec\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4. index.html \uc606\uc5d0 vision.mjs\ub97c, models/ \ud3f4\ub354\uc5d0 \ubaa8\ub378 \ud30c\uc77c\uc744 \ub450\uc138\uc694.':"在 index.html 同一文件夹里没找到 vision.mjs，YOLO 无法启动。请把 vision.mjs 及其模型文件一起上传。";alert(m)};});
 const _r=render;render=function(){_r();indRender()};
 tick();setInterval(tick,1000);applyLang();
-</script><script type="module" src="./vision.mjs"></script><script type="module">
+</script><script type="module" src="./vision.mjs" onerror="window.visionModuleLoadError()"></script><script type="module">
 (()=>{try{
 const $=s=>document.querySelector(s);
 const T={
