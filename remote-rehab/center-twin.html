@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="庆云大学数字孪生控制中心：仅接收企业现场的结构化遥测（坐标 · 体征 · 告警），原始视频不出边缘端。">
+<title>庆云大学 · 数字孪生控制中心 | ReMotion-K</title>
+<style>
+:root{--bg:#070d17;--panel:#0e1626;--panel2:#121d31;--line:#1e2c44;--ink:#e8f0fb;--muted:#8fa2bd;--cy:#38bdf8;--gr:#22c55e;--rd:#ef4444;--am:#f59e0b;--pu:#a78bfa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Segoe UI","Microsoft Yahei","Malgun Gothic",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0a1424,#0d1a2e);flex-wrap:wrap}
+.mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#38bdf8,#a78bfa);color:#07101f;display:grid;place-items:center;font-weight:900;font-size:18px;flex:0 0 auto}
+.brand b{display:block;font-size:15px;letter-spacing:.3px}.brand small{display:block;color:var(--muted);font-size:11px}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:5px 12px;font-size:11px;color:var(--muted);white-space:nowrap}
+.chip i{width:8px;height:8px;border-radius:50%;background:#5b6b80;flex:0 0 auto}
+.chip.on{color:var(--gr);border-color:#22c55e55}.chip.on i{background:var(--gr);box-shadow:0 0 0 4px #22c55e22}
+.spacer{flex:1}
+.clock{font-variant-numeric:tabular-nums;color:#bcd0e8;font-size:13px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.langbtn{width:40px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:800}
+main{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;padding:12px 16px 6px;align-items:start}
+@media(max-width:960px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.ph{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800;font-size:13px}
+.ph small{font-weight:500;color:var(--muted);font-size:10px;margin-left:auto}
+.mapwrap{padding:12px}
+.map{position:relative;aspect-ratio:16/10;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:
+radial-gradient(circle at 20% 20%,#16304f22,transparent 40%),radial-gradient(circle at 80% 75%,#16304f22,transparent 40%),#0a1424;
+background-image:linear-gradient(#1c2c4433 1px,transparent 1px),linear-gradient(90deg,#1c2c4433 1px,transparent 1px);background-size:32px 32px}
+.st{position:absolute;border:1px solid #2c4a6e;background:#12233c99;border-radius:9px;padding:7px 9px;font-size:11px;font-weight:700;color:#cfe0f2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.st small{display:block;color:#6f87a5;font-weight:500;font-size:9px}
+.map svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.wd{position:absolute;width:38px;height:38px;transform:translate(-50%,-50%);pointer-events:none}
+.wd .ring{position:absolute;inset:0;border-radius:50%;border:2px solid #5b6b80;background:#101c3099}
+.wd .ring.g{background:#12342a99;border-color:var(--gr)}.wd .ring.r{background:#3a1c2299;border-color:var(--rd)}
+.wd .ring.z{box-shadow:0 0 0 4px #f59e0b33,0 0 14px #f59e0b55}
+.wd .dot{position:absolute;inset:8px;border-radius:50%;background:#7c8ea6}
+.wd .ring.g .dot{background:#4ade80}.wd .ring.r .dot{background:#f87171}
+.wd.off{opacity:.35}
+.wd .wl{position:absolute;top:100%;left:50%;transform:translateX(-50%);margin-top:3px;font-size:9px;font-weight:800;color:#9fb4cd;background:#0a1424cc;border:1px solid #1e2c44;border-radius:6px;padding:1px 6px;white-space:nowrap}
+.wd .ring.fl{animation:flflash 1s ease-out infinite}@keyframes flflash{0%,100%{box-shadow:0 0 0 0 #ef444400}50%{box-shadow:0 0 0 6px #ef444466}}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.legend .lg{background:#4ade80}.legend .lr{background:#f87171}.legend .lz{border:2px solid var(--am);background:transparent}.legend .lk{background:#7c8ea6}
+.rcol{display:flex;flex-direction:column;gap:12px;min-width:0}
+.vit{width:100%;border-collapse:collapse;font-size:12px}
+.vit th{color:var(--muted);font-weight:600;font-size:10px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.vit td{padding:7px 10px;border-bottom:1px solid #18264066;white-space:nowrap}
+.vit tr.off td{opacity:.35}
+.vit td i{font-style:normal;color:var(--muted);font-size:10px}
+.vit .num{font-variant-numeric:tabular-nums}
+.wtag{display:inline-block;min-width:30px;text-align:center;background:#182a45;border:1px solid #2a4166;border-radius:7px;padding:1px 6px;font-weight:800;color:#cfe4ff}
+.helm{display:inline-flex;align-items:center;gap:5px}
+.helm i{width:9px;height:9px;border-radius:50%;background:#7c8ea6;display:inline-block}
+.helm.g i{background:#4ade80}.helm.r i{background:#f87171}
+.inc{padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--am);border-radius:10px;background:var(--panel2)}
+.inc.high{border-left-color:var(--rd)}.inc.info{border-left-color:var(--cy)}
+.inc+.inc{margin-top:8px}
+.ic-top{display:flex;align-items:center;gap:7px;font-size:11px}
+.ic-ic{font-size:15px;line-height:1}.ic-time{margin-left:auto;color:var(--muted);font-size:10px}
+.inc p{margin:6px 0 8px;font-size:12px;color:#c9d6e8}
+.ic-bt{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.ic-bt button{background:#182a45;border:1px solid #2a4166;color:#dce9fb;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700}
+.ic-bt button.primary{background:#38bdf826;border-color:#38bdf866;color:#7dd3fc}
+.ic-bt input{flex:1 1 140px;min-width:0;background:#0a1424;border:1px solid #2a4166;border-radius:8px;padding:5px 9px;color:var(--ink);font-size:11px}
+.ic-st{margin-top:7px;font-size:10px;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ic-st b{color:var(--gr);font-weight:700}.ic-st .wait{color:var(--am)}
+.empty{padding:20px 12px;text-align:center;color:var(--muted);font-size:12px}
+.log{padding:4px 12px 12px;max-height:150px;overflow:auto}
+.log .le{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px dashed #182640;font-size:11px;flex-wrap:wrap}
+.log .le .t{color:var(--muted);font-size:10px;margin-left:auto;white-space:nowrap}
+.log .le b{color:var(--am);font-weight:700}
+footer{padding:10px 18px 14px;color:var(--muted);font-size:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer b{color:#a9bdd6}
+@media print{header,footer,.legend{display:none}main{padding:0}}
+</style>
+</head>
+<body>
+<header>
+ <div class="mark">K</div>
+ <div class="brand"><b data-i="ctTitle">庆云大学 · 数字孪生控制中心</b><small data-i="ctSub">ReMotion-K 企业现场 ⇄ 数字孪生 · 仅结构化数据 · 无视频</small></div>
+ <div class="spacer"></div>
+ <span class="chip" id="connChip"><i></i><span id="connTxt" data-i="ctOffline">企业现场边缘端 · 未连接</span></span>
+ <span class="clock" id="clock">--:--:--</span>
+ <button class="langbtn" id="langBtn" aria-label="切换语言">中</button>
+</header>
+<main>
+ <section class="panel" aria-label="map">
+  <div class="ph"><span data-i="ctMapT">厂区平面 · 数字孪生</span><small id="mapMeta">—</small></div>
+  <div class="mapwrap"><div class="map" id="map"></div>
+  <div class="legend"><span><i class="lg"></i><span data-i="ctHelmYes">安全帽 · 已戴</span></span><span><i class="lr"></i><span data-i="ctHelmNo">安全帽 · 未戴</span></span><span><i class="lk"></i><span data-i="ctHelmUnk">安全帽 · 未知</span></span><span><i class="lz"></i><span data-i="ctZone">危险区域</span></span><span data-i="ctTrail">尾迹 = 最近移动轨迹</span></div></div>
+ </section>
+ <div class="rcol">
+  <section class="panel" aria-label="vitals">
+   <div class="ph"><span data-i="ctVitalsT">现场体征（合成 / 穿戴）</span><small id="vitMeta">—</small></div>
+   <div style="overflow:auto"><table class="vit"><thead><tr><th data-i="ctWorker">工人</th><th data-i="ctHr">心率</th><th data-i="ctTemp">体温</th><th data-i="ctBp">血压</th><th data-i="ctLean">倾斜</th><th data-i="ctHelmC">安全帽</th><th data-i="ctStation">工位</th><th data-i="ctSeen">最后在线</th></tr></thead><tbody id="vitBody"></tbody></table></div>
+  </section>
+  <section class="panel" aria-label="alerts">
+   <div class="ph"><span data-i="ctQueueT">告警队列</span><small id="incCount">0</small></div>
+   <div style="padding:12px" id="incList"></div>
+  </section>
+  <section class="panel" aria-label="cmdlog">
+   <div class="ph"><span data-i="ctLogT">指示日志</span><small data-i="ctLogSub">等待现场确认回执</small></div>
+   <div class="log" id="cmdLog"><div class="empty" data-i="ctEmptyLog">尚无指示</div></div>
+  </section>
+ </div>
+</main>
+<footer><span><b data-i="ctPrivacyB">仅接收结构化数据</b> · <span data-i="ctPrivacy">坐标 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核</span></span><span data-i="ctDemo">演示用合成数据 · 无医疗诊断</span></footer>
+<script src="twin-link.js"></script>
+<script>
+'use strict';
+/* ===== 庆云大学 · 数字孪生控制中心（classic script，file:// 可用） ===== */
+const I={
+zh:{ctTitle:'庆云大学 · 数字孪生控制中心',ctSub:'ReMotion-K 企业现场 ⇄ 数字孪生 · 仅结构化数据 · 无视频',ctOnline:'企业现场边缘端 · 已连接',ctOffline:'企业现场边缘端 · 未连接',ctRelay:'中继模式',ctMapT:'厂区平面 · 数字孪生',ctVitalsT:'现场体征（合成 / 穿戴）',ctWorker:'工人',ctHr:'心率',ctTemp:'体温',ctBp:'血压',ctLean:'倾斜',ctHelmC:'安全帽',ctStation:'工位',ctSeen:'最后在线',ctQueueT:'告警队列',ctLogT:'指示日志',ctLogSub:'等待现场确认回执',ctEmptyLog:'尚无指示',ctEmpty:'暂无告警',ctPrivacyB:'仅接收结构化数据',ctPrivacy:'坐标 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核',ctDemo:'演示用合成数据 · 无医疗诊断',ctHelmYes:'安全帽 · 已戴',ctHelmNo:'安全帽 · 未戴',ctHelmUnk:'安全帽 · 未知',ctZone:'危险区域',ctTrail:'尾迹 = 最近移动轨迹',ctRisk:'现场风险',ctAck:'签收',ctAcked:'已签收',ctInstruct:'指示',ctCmdPh:'输入指示内容…',ctCmdSend:'发送指示',ctCmdSent:'指示已发送',ctWaitAck:'等待现场回执',ctRecv:'现场已回执',ctZoneK:'区域闯入',ctFallK:'疑似跌倒',ctHelmetK:'未戴安全帽',ctLeanK:'姿态负荷',ctManualK:'手动上报',ctSt1:'冲压工位',ctSt2:'组装工位',ctSt3:'恢复训练区',ctSt4:'搬运通道',ctOff:'离线',ctOn:'在线',ctDemoTag:'合成数据',ctNoVitals:'尚无体征数据',ctLang:'中'},
+en:{ctTitle:'Kyungwoon Univ. · Digital Twin Control Center',ctSub:'ReMotion-K worksite ⇄ digital twin · structured data only · no video',ctOnline:'Worksite edge · connected',ctOffline:'Worksite edge · offline',ctRelay:'relay mode',ctMapT:'Floor plan · digital twin',ctVitalsT:'Worksite vitals (synthetic / wearable)',ctWorker:'Worker',ctHr:'HR',ctTemp:'Temp',ctBp:'BP',ctLean:'Lean',ctHelmC:'Helmet',ctStation:'Station',ctSeen:'Seen',ctQueueT:'Alert queue',ctLogT:'Instruction log',ctLogSub:'Awaiting worksite confirmation',ctEmptyLog:'No instructions yet',ctEmpty:'No open alerts',ctPrivacyB:'Structured data only',ctPrivacy:'coordinates · vitals · alerts. Raw video never leaves the edge · no identification · cues reviewed by professionals',ctDemo:'Synthetic demo data · no medical diagnosis',ctHelmYes:'Helmet · worn',ctHelmNo:'Helmet · missing',ctHelmUnk:'Helmet · unknown',ctZone:'Danger zone',ctTrail:'Trail = recent movement',ctRisk:'Site risk',ctAck:'Sign off',ctAcked:'Signed off',ctInstruct:'Instruct',ctCmdPh:'Type an instruction…',ctCmdSend:'Send instruction',ctCmdSent:'Instruction sent',ctWaitAck:'awaiting worksite reply',ctRecv:'Worksite confirmed',ctZoneK:'Zone entry',ctFallK:'Suspected fall',ctHelmetK:'No helmet',ctLeanK:'Posture load',ctManualK:'Manual report',ctSt1:'Press',ctSt2:'Assembly',ctSt3:'Recovery zone',ctSt4:'Transport aisle',ctOff:'offline',ctOn:'online',ctDemoTag:'SYNTHETIC',ctNoVitals:'No vital data yet',ctLang:'EN'},
+ko:{ctTitle:'경운대학교 · 디지털 트윈 관제센터',ctSub:'ReMotion-K 작업 현장 ⇄ 디지털 트윈 · 구조화 데이터만 · 영상 없음',ctOnline:'작업 현장 엣지 · 연결됨',ctOffline:'작업 현장 엣지 · 미연결',ctRelay:'중계 모드',ctMapT:'공장 평면 · 디지털 트윈',ctVitalsT:'현장 생체 신호 (합성 / 웨어러블)',ctWorker:'작업자',ctHr:'심박',ctTemp:'체온',ctBp:'혈압',ctLean:'기울기',ctHelmC:'안전모',ctStation:'구역',ctSeen:'최근 수신',ctQueueT:'경보 대기열',ctLogT:'지시 기록',ctLogSub:'현장 확인 대기 중',ctEmptyLog:'지시 내역이 없습니다',ctEmpty:'미처리 경보가 없습니다',ctPrivacyB:'구조화 데이터만 수신',ctPrivacy:'좌표 · 생체 신호 · 경보. 원본 영상은 엣지를 떠나지 않습니다 · 신원 미식별 · 전문가가 검토합니다',ctDemo:'합성 데모 데이터 · 의료 진단 아님',ctHelmYes:'안전모 · 착용',ctHelmNo:'안전모 · 미착용',ctHelmUnk:'안전모 · 알 수 없음',ctZone:'위험 구역',ctTrail:'궤적 = 최근 이동',ctRisk:'현장 위험도',ctAck:'접수',ctAcked:'접수됨',ctInstruct:'지시',ctCmdPh:'지시 내용 입력…',ctCmdSend:'지시 전송',ctCmdSent:'지시 전송됨',ctWaitAck:'현장 회신 대기',ctRecv:'현장 확인 완료',ctZoneK:'구역 진입',ctFallK:'낙상 의심',ctHelmetK:'안전모 미착용',ctLeanK:'자세 부하',ctManualK:'수동 보고',ctSt1:'프레스',ctSt2:'조립',ctSt3:'회복 훈련 구역',ctSt4:'운반 통로',ctOff:'오프라인',ctOn:'온라인',ctDemoTag:'합성 데이터',ctNoVitals:'생체 데이터 없음',ctLang:'KO'}
+};
+const $=s=>document.querySelector(s),tr=k=>I[lang][k]||I.zh[k]||k;
+let lang='zh';try{lang=localStorage.getItem('ct_lang')||'zh'}catch(e){}
+const RELAY=new URLSearchParams(location.search).get('relay')==='1';
+const TW=window.SHKTwinLink;TW.init({role:'center',relay:RELAY});
+const STN={s1:'ctSt1',s2:'ctSt2',s3:'ctSt3',s4:'ctSt4'};
+const DEF_ST={s1:{x:.14,y:.16,w:.34,h:.36},s2:{x:.52,y:.16,w:.34,h:.36},s3:{x:.14,y:.58,w:.34,h:.34},s4:{x:.52,y:.58,w:.34,h:.34}};
+let ST=JSON.parse(JSON.stringify(DEF_ST)),ZN=null,risk=null,edgeName=null,edgeLast=0,edgeLang='zh';
+const W={};                       // id -> {x,y,last,trail:[],hr,temp,spo2,bp,lean,helm,inZone,vlast}
+const INC=[];                     // {id,kind,level,station,text,time,src,acked,cmd:null|{text,sent,acked}}
+const LOG=[];                     // {ref,station,text,time,acked}
+const PING=[];                    // {st,t} 事件红点（地图）
+let dirty=true;
+
+function stName(id){return STN[id]?tr(STN[id]):(ST[id]&&ST[id].name?ST[id].name:id||'—')}
+function stOf(x,y){for(const id in ST){const s=ST[id];if(x>=s.x&&x<=s.x+s.w&&y>=s.y&&y<=s.y+s.h)return id}return null}
+
+function applyLang(){document.querySelectorAll('[data-i]').forEach(n=>{n.textContent=tr(n.dataset.i)});$('#langBtn').textContent=tr('ctLang');try{localStorage.setItem('ct_lang',lang)}catch(e){}chip();dirty=true}
+function chip(){const on=Date.now()-edgeLast<24000;$('#connChip').classList.toggle('on',on);$('#connTxt').textContent=tr(on?'ctOnline':'ctOffline')+(RELAY?' · '+tr('ctRelay'):'');}
+
+TW.on(function(m){
+ const d=m.data||{};
+ if(m.type==='hello'){edgeLast=Date.now();edgeName=d.name||null;edgeLang=d.lang||'zh';risk=d.risk;if(d.stations&&d.stations.length){const st={};d.stations.forEach(function(s){if(s&&s.id&&s.x!=null)st[s.id]={id:s.id,name:s.name,x:+s.x,y:+s.y,w:+s.w,h:+s.h}});if(Object.keys(st).length)ST=st}ZN=d.zone||null;dirty=true;chip();}
+ else if(m.type==='twin'){edgeLast=Date.now();ZN=d.zone||null;(d.people||[]).forEach(function(p){if(!p)return;const w=W[p.id]=W[p.id]||{id:p.id,x:.5,y:.5,last:0,trail:[],hr:null,temp:null,spo2:null,bp:null,lean:null,helm:null,inZone:false,vlast:0};w.x=+p.x||w.x;w.y=+p.y||w.y;w.lean=p.lean==null?w.lean:+p.lean;w.helm=p.helmet===undefined?w.helm:p.helmet;w.inZone=!!p.inZone;w.last=Date.now();w.trail.push({x:w.x,y:w.y,t:w.last});if(w.trail.length>40)w.trail.shift();});dirty=true;}
+ else if(m.type==='vitals'){edgeLast=Date.now();(d.people||[]).forEach(function(p){if(!p)return;const w=W[p.id]=W[p.id]||{id:p.id,x:.5,y:.5,last:0,trail:[],hr:null,temp:null,spo2:null,bp:null,lean:null,helm:null,inZone:false,vlast:0};w.hr=p.hr==null?null:+p.hr;w.temp=p.temp==null?null:+p.temp;w.spo2=p.spo2==null?null:+p.spo2;w.bp=p.bp||null;w.vlast=Date.now();});dirty=true;}
+ else if(m.type==='incident'){edgeLast=Date.now();if(!INC.some(x=>x.id===d.id)){INC.unshift({id:d.id,kind:d.kind||'manual',level:d.level||'warn',station:d.station||null,text:d.text||('['+d.kind+']'),time:d.time||new Date().toTimeString().slice(0,8),src:d.src||'edge',acked:false,cmd:null});if(INC.length>50)INC.length=50;if(d.station)PING.push({st:d.station,t:Date.now()});if(d.level==='high')beep();dirty=true;}}
+ else if(m.type==='receipt'&&d.kind==='command'&&d.ref){const c=INC.find(x=>x.cmd&&x.cmd.sent&&x.id===d.ref);const l=LOG.find(x=>x.ref===d.ref);if(c&&c.cmd){c.cmd.acked=true}if(l){l.acked=true}dirty=true;}
+});
+
+function beep(){try{const o=new (window.AudioContext||window.webkitAudioContext)(),g=o.createGain();g.gain.value=.08;g.connect(o.destination);const a=o.createOscillator();a.frequency.value=740;a.connect(g);a.start();a.stop(o.currentTime+.35);setTimeout(()=>o.close(),800)}catch(e){}}
+
+function draw(){
+ const map=$('#map');if(!map)return;
+ /* 工位块 */
+ const stHtml=Object.keys(ST).map(id=>{const s=ST[id];return `<div class="st" style="left:${s.x*100}%;top:${s.y*100}%;width:${s.w*100}%;height:${s.h*100}%">${stName(id)}<small>${id.toUpperCase()}</small></div>`}).join('');
+ /* 工人点 */
+ const now=Date.now();
+ const wdHtml=Object.keys(W).map(id=>{const w=W[id],off=now-w.last>15000;
+  const cls=['wd'];if(off)cls.push('off');
+  const ring=['ring'];if(!off){if(w.helm==='yes')ring.push('g');else if(w.helm==='no')ring.push('r');if(w.inZone)ring.push('z');if(PING.some(p=>p.st&&stOf(w.x,w.y)===p.st&&now-p.t<6000))ring.push('fl')}
+  return `<div class="${cls.join(' ')}" style="left:${w.x*100}%;top:${w.y*100}%"><div class="${ring.join(' ')}"><div class="dot"></div></div><span class="wl">${w.id}</span></div>`}).join('');
+ const zoneRect=ZN?`<rect x="${ZN.x*100}%" y="${ZN.y*100}%" width="${ZN.w*100}%" height="${ZN.h*100}%" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6 4"/>`:'';
+ const trails=Object.keys(W).map(id=>{const w=W[id];if(w.trail.length<2)return'';const pts=w.trail.map(p=>`${(p.x*100).toFixed(2)},${(p.y*100).toFixed(2)}`).join(' ');return `<polyline points="${pts}" fill="none" stroke="#38bdf855" stroke-width="1.5" stroke-linecap="round"/>`}).join('');
+ const pings=PING.filter(p=>now-p.t<6000).map(p=>{const s=ST[p.st];if(!s)return'';return `<circle cx="${(s.x+s.w/2)*100}%" cy="${(s.y+s.h/2)*100}%" r="9" fill="none" stroke="#ef4444" stroke-width="2"><animate attributeName="r" values="6;14" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite"/></circle>`}).join('');
+ map.innerHTML=stHtml+wdHtml;
+ /* svg 覆盖层 */
+ let svg=$('#mapSvg');if(!svg){svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.id='mapSvg';svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');map.appendChild(svg)}
+ svg.innerHTML=zoneRect+trails+pings;
+ /* 体征表 */
+ const rows=Object.keys(W).sort().map(id=>{const w=W[id],off=now-w.last>15000;
+  const fmt=v=>v==null?'—':v;
+  const helm=w.helm==='yes'?`<span class="helm g"><i></i>${tr('ctHelmYes')}</span>`:w.helm==='no'?`<span class="helm r"><i></i>${tr('ctHelmNo')}</span>`:`<span class="helm"><i></i>${tr('ctHelmUnk')}</span>`;
+  const st=stOf(w.x,w.y);
+  const ago=Math.max(0,Math.round((now-w.last)/1000))+'s';
+  return `<tr class="${off?'off':''}"><td><span class="wtag">${w.id}</span></td><td class="num">${fmt(w.hr)}${w.hr!=null?' <i>bpm</i>':''}</td><td class="num">${fmt(w.temp)}${w.temp!=null?' <i>°C</i>':''}</td><td class="num">${fmt(w.bp)}</td><td class="num">${fmt(w.lean)}${w.lean!=null?' <i>°</i>':''}</td><td>${helm}</td><td>${st?stName(st):'—'}</td><td class="num">${off?'<i>'+tr('ctOff')+'</i>':ago}</td></tr>`}).join('');
+ $('#vitBody').innerHTML=rows||`<tr><td colspan="8" class="empty">${tr('ctNoVitals')}</td></tr>`;
+ /* 告警队列 */
+ const KIND={zone:['⚠',tr('ctZoneK')],fall:['⏷',tr('ctFallK')],helmet:['⛑',tr('ctHelmetK')],lean:['↩',tr('ctLeanK')],manual:['✎',tr('ctManualK')]};
+ $('#incCount').textContent=INC.filter(x=>!x.acked).length;
+ $('#incList').innerHTML=INC.length?INC.map(x=>{const k=KIND[x.kind]||KIND.manual;
+  let bt=``,st=``;
+  if(!x.acked)bt=`<button data-inc="${x.id}" data-act="ack">${tr('ctAck')}</button><button data-inc="${x.id}" data-act="cmd">${tr('ctInstruct')}</button>`;
+  if(x.cmd&&!x.cmd.sent)bt=`<input id="cmdin-${x.id}" placeholder="${tr('ctCmdPh')}"><button data-inc="${x.id}" data-act="send" class="primary">${tr('ctCmdSend')}</button>`;
+  if(x.cmd&&x.cmd.sent)st=`<b>${tr('ctCmdSent')}</b><span class="wait">⏳ ${x.cmd.acked?tr('ctRecv'):tr('ctWaitAck')}</span>`;
+  if(x.acked&&!x.cmd)st=`<b>${tr('ctAcked')}</b>`;
+  return `<div class="inc ${x.level==='high'?'high':x.level==='info'?'info':''}" data-inc="${x.id}"><div class="ic-top"><span class="ic-ic">${k[0]}</span><b>${k[1]}</b><span class="ic-time">${x.time}${x.station?' · '+stName(x.station):''}</span></div><p>${x.text}</p><div class="ic-bt">${bt}</div>${st?`<div class="ic-st">${st}</div>`:''}</div>`}).join(''):`<div class="empty">${tr('ctEmpty')}</div>`;
+ /* 指示日志 */
+ $('#cmdLog').innerHTML=LOG.length?LOG.map(l=>`<div class="le"><b>→ ${stName(l.station)}</b><span>${l.text}</span><span class="t">${l.time} ${l.acked?'✓ '+tr('ctRecv'):'⏳'}</span></div>`).join(''):`<div class="empty">${tr('ctEmptyLog')}</div>`;
+ /* 元信息 */
+ $('#mapMeta').textContent=tr('ctRisk')+': '+(risk==null?'—':risk)+(edgeName?' · '+edgeName:'');
+ const online=Object.keys(W).filter(id=>Date.now()-W[id].last<=15000).length;
+ $('#vitMeta').textContent=online+' '+tr('ctOn')+' · '+tr('ctDemoTag');
+ dirty=false;
+}
+function rloop(){if(dirty)draw();requestAnimationFrame(rloop)}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b)return;
+ if(b.id==='langBtn'){lang=lang==='zh'?'en':lang==='en'?'ko':'zh';applyLang();return}
+ const d=b.dataset;
+ if(d.act==='ack'){const x=INC.find(v=>v.id===d.inc);if(x&&!x.acked){x.acked=true;TW.send('receipt',{ref:x.id,kind:'incident',text:tr('ctAcked')});notify('✓ '+tr('ctAcked')+' · '+x.id)}}
+ else if(d.act==='cmd'){const x=INC.find(v=>v.id===d.inc);if(x){x.acked=true;x.cmd={text:'',sent:false,acked:false};TW.send('receipt',{ref:x.id,kind:'incident',text:tr('ctAcked')})}}
+ else if(d.act==='send'){const x=INC.find(v=>v.id===d.inc);const inp=$('#cmdin-'+d.inc);if(x&&x.cmd&&inp&&inp.value.trim()){x.cmd.text=inp.value.trim();x.cmd.sent=true;const l={ref:x.id,station:x.station,text:x.cmd.text,time:new Date().toTimeString().slice(0,5),acked:false};LOG.unshift(l);if(LOG.length>40)LOG.length=40;TW.send('command',{ref:x.id,station:x.station||null,text:x.cmd.text});notify('→ '+tr('ctCmdSent'))}}
+ dirty=true;
+});
+function notify(s){let t=$('#ctToast');if(!t){t=document.createElement('div');t.id='ctToast';t.style.cssText='position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#152b46;color:#fff;padding:10px 15px;border-radius:10px;z-index:99;font-size:12px;opacity:0;transition:opacity .2s';document.body.appendChild(t)}t.textContent=s;t.style.opacity=1;clearTimeout(t._tm);t._tm=setTimeout(()=>t.style.opacity=0,2000)}
+/* 心跳：center-hello 每 5s；时钟与清理每 1s */
+TW.send('center-hello',{name:'庆云大学控制中心',lang:lang});
+setInterval(()=>{TW.send('center-hello',{name:'庆云大学控制中心',lang:lang})},5000);
+setInterval(()=>{
+ $('#clock').textContent=new Date().toLocaleTimeString(lang==='zh'?'zh-CN':lang==='ko'?'ko-KR':'en-US',{hour12:false});
+ const now=Date.now();
+ Object.keys(W).forEach(id=>{if(now-W[id].last>60000)delete W[id]});
+ if(PING.length>20)PING.splice(0,PING.length-20);
+ chip();dirty=true;
+},1000);
+applyLang();rloop();
+</script>
+</body>
+</html>

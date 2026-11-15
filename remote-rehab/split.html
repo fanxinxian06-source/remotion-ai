@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ReMotion-K _ 企业 · 庆云大学 分屏：企业现场边缘端 ⇄ 庆云大学数字孪生控制中心，结构化数据链路演示。">
+<title>ReMotion-K _ 企业 · 庆云大学 分屏</title>
+<style>
+:root{--bg:#070d17;--bar:#0d1a2e;--panel:#0e1626;--line:#1e2c44;--ink:#e8f0fb;--muted:#8fa2bd;--cy:#5fe1d0}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Segoe UI","Microsoft Yahei","Malgun Gothic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;cursor:pointer;color:var(--ink);background:#16273f;border:1px solid #2a4166;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+button.on{background:#38bdf826;border-color:#38bdf8;color:#7dd3fc}
+button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+.bar{display:flex;align-items:center;gap:12px;padding:9px 14px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap;z-index:8}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#5fe1d0,#38bdf8);color:#07101f;display:grid;place-items:center;font-weight:900;font-size:16px;flex:0 0 auto}
+.brand b{display:block;font-size:14px;letter-spacing:.3px;white-space:nowrap}
+.brand small{display:block;color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flowchip{display:inline-flex;gap:10px;align-items:center;border:1px solid #22c55e55;background:#0f2a1e66;border-radius:9px;padding:5px 10px;font-size:10px;color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}
+.flowchip i{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px #22c55e22;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.spacer{flex:1}
+.seg{display:flex;border:1px solid #2a4166;border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#16273f}
+.seg button+button{border-left:1px solid #2a4166}
+.swapbtn{background:#a78bfa22;border-color:#a78bfa88;color:#c4b5fd}
+.langbtn{width:38px}
+.splitwrap{flex:1;position:relative;min-height:0}
+.canvas-wrap{position:absolute;inset:0;pointer-events:none;z-index:6}
+.canvas-wrap canvas{width:100%;height:100%;display:block}
+.split{position:absolute;inset:0;display:flex;z-index:2}
+.split .pane{position:relative;min-width:0;min-height:0;overflow:hidden;background:#0a1424}
+.split iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+.pane-tag{position:absolute;top:10px;left:12px;z-index:7;pointer-events:none;background:#0d1a2ecc;border:1px solid #2a4166;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:800;color:#bcd0e8}
+.pane-tag i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;background:#5fe1d0}
+.pane-b .pane-tag i{background:#a78bfa}
+/* 左右布局 */
+.split.cols{flex-direction:row}
+.split.cols #fa{width:calc(var(--ra,.5)*100% - 6px);order:1}
+.split.cols .div{width:12px;height:100%;order:2;cursor:col-resize}
+.split.cols #fb{flex:1;order:3}
+/* 上下布局 */
+.split.rows{flex-direction:column}
+.split.rows #fa{height:calc(var(--ra,.5)*100% - 6px);order:1}
+.split.rows .div{height:12px;width:100%;order:2;cursor:row-resize}
+.split.rows #fb{flex:1;order:3}
+/* 交换：不移动 iframe DOM，只换视觉顺序（摄像头不丢） */
+.split.swap.cols #fa{order:3}.split.swap.cols #fb{order:1}
+.split.swap.rows #fa{order:3}.split.swap.rows #fb{order:1}
+.div{background:linear-gradient(90deg,#1e2c44,#2f4a70 50%,#1e2c44);background-size:200% 100%;animation:divglow 3s linear infinite;position:relative;z-index:9;display:flex;align-items:center;justify-content:center}
+.rows .div{background:linear-gradient(180deg,#1e2c44,#2f4a70 50%,#1e2c44);background-size:100% 200%}
+@keyframes divglow{0%{background-position:0 0}100%{background-position:200% 0}}
+.rows .div{animation-name:divglowV}@keyframes divglowV{0%{background-position:0 0}100%{background-position:0 200%}}
+.div:after{content:"⦿";color:#5fe1d0;font-size:11px;text-shadow:0 0 8px #5fe1d0;position:relative;z-index:1}
+.hint{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:7px 14px;background:var(--bar);border-top:1px solid var(--line);font-size:10px;color:var(--muted);z-index:8}
+.hint .lg{display:inline-flex;align-items:center;gap:6px}
+.hint i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.hint b{color:#a9bdd6;font-weight:600}
+.hint .note{margin-left:auto;color:#7b8fa8}
+@media(max-width:760px){.brand small{display:none}.flowchip{order:9;width:100%}.hint .note{margin-left:0}}
+@media print{.bar,.hint,.canvas-wrap,.div:after{display:none}}
+</style>
+</head>
+<body>
+<div class="bar">
+ <div class="brand"><div class="mark">R</div><div><b data-i="spTitle">ReMotion-K _ 企业 · 庆云大学 分屏</b><small data-i="spSub">企业现场边缘端 ⇄ 庆云大学数字孪生控制中心 · 结构化数据链路演示</small></div></div>
+ <span class="flowchip" id="flowChip"><i></i><span id="flowTxt">⤳ 0 pkt/s · 0 KB/s · A→B 0 · B→A 0</span></span>
+ <div class="spacer"></div>
+ <div class="seg" role="group" aria-label="connection"><button id="mDemo" data-i="spModeDemo">演示</button><button id="mRelay" data-i="spModeRelay">中继</button></div>
+ <div class="seg" role="group" aria-label="layout"><button id="lCols" data-i="spLayCols">左右</button><button id="lRows" data-i="spLayRows">上下</button></div>
+ <div class="seg" role="group" aria-label="ratio"><button data-ra=".5">50/50</button><button data-ra=".4">40/60</button><button data-ra=".6">60/40</button><button data-ra=".3">30/70</button><button data-ra=".7">70/30</button></div>
+ <button class="swapbtn" id="swapBtn" data-i="spSwap">⇄ 交换</button>
+ <button class="langbtn" id="langBtn">中</button>
+</div>
+<div class="splitwrap">
+ <div class="split cols" id="split" style="--ra:.5">
+  <div class="pane pane-a" id="pa"><span class="pane-tag"><i></i><span data-i="spPaneA">企业现场 · ReMotion 边缘 AI</span></span><iframe id="fa" title="企业现场边缘端" allow="camera *; bluetooth *; serial *; screen-wake-lock *; fullscreen *"></iframe></div>
+  <div class="div" id="div" role="separator" aria-orientation="vertical" tabindex="0" title="拖动分隔条调整比例"></div>
+  <div class="pane pane-b" id="pb"><span class="pane-tag"><i></i><span data-i="spPaneB">庆云大学控制中心 · 数字孪生</span></span><iframe id="fb" title="庆云大学控制中心" allow="camera *; bluetooth *; serial *; screen-wake-lock *; fullscreen *"></iframe></div>
+ </div>
+ <div class="canvas-wrap"><canvas id="cv"></canvas></div>
+</div>
+<div class="hint">
+ <span class="lg"><i style="background:#38bdf8"></i><b data-i="spH1">twin</b><span data-i="spH1d">姿态坐标 · 5Hz</span></span>
+ <span class="lg"><i style="background:#22c55e"></i><b data-i="spH2">vitals</b><span data-i="spH2d">生命体征 · 1Hz</span></span>
+ <span class="lg"><i style="background:#ef4444"></i><b data-i="spH3">incident</b><span data-i="spH3d">现场告警</span></span>
+ <span class="lg"><i style="background:#a78bfa"></i><b data-i="spH4">hello</b><span data-i="spH4d">心跳 · 工位布局</span></span>
+ <span class="lg"><i style="background:#f59e0b"></i><b data-i="spH5">指示 / 签收</b><span data-i="spH5d">中心指示 · 回执</span></span>
+ <span class="note" data-i="spNote">结构化数据演示 · 视频不出边缘端 · 无医疗诊断</span>
+</div>
+<script>
+'use strict';
+/* ===== ReMotion-K _ 企业 · 庆云大学 分屏 =====
+ * 传输: iframe 通过 window.parent postMessage 上报 → 本页转发给"非来源" iframe（file:// 主通路）
+ *       BroadcastChannel('shinek-twin') 仅用于观察画布动画（server 模式跨文档，file:// 下不可用）
+ * 防环: 只转 postMessage 路径、只转给非源 iframe、from:seq 去重；twin-link 只派发不转发。 */
+const I={
+zh:{spTitle:'ReMotion-K _ 企业 · 庆云大学 分屏',spSub:'企业现场边缘端 ⇄ 庆云大学数字孪生控制中心 · 结构化数据链路演示',spModeDemo:'演示',spModeRelay:'中继',spLayCols:'左右',spLayRows:'上下',spSwap:'⇄ 交换',spPaneA:'企业现场 · ReMotion 边缘 AI',spPaneB:'庆云大学控制中心 · 数字孪生',spH1:'twin',spH1d:'姿态坐标 · 5Hz',spH2:'vitals',spH2d:'生命体征 · 1Hz',spH3:'incident',spH3d:'现场告警',spH4:'hello',spH4d:'心跳 · 工位布局',spH5:'指示 / 签收',spH5d:'中心指示 · 回执',spNote:'结构化数据演示 · 视频不出边缘端 · 无医疗诊断',spRelayConfirm:'中继模式需要先运行 python3 server.py，再从 http://localhost:8000/split.html 打开本页（两台电脑可用局域网 IP 互连）。仍要切换吗？',spLblIncident:'告警',spLblCommand:'指示',spLang:'中'},
+en:{spTitle:'ReMotion-K _ Worksite · Kyungwoon Univ. split',spSub:'Worksite edge ⇄ Kyungwoon digital-twin control center · structured data link demo',spModeDemo:'DEMO',spModeRelay:'RELAY',spLayCols:'SIDE',spLayRows:'STACK',spSwap:'⇄ SWAP',spPaneA:'Worksite · ReMotion edge AI',spPaneB:'Kyungwoon control center · digital twin',spH1:'twin',spH1d:'pose coordinates · 5Hz',spH2:'vitals',spH2d:'vital signs · 1Hz',spH3:'incident',spH3d:'site alerts',spH4:'hello',spH4d:'heartbeat · floor layout',spH5:'instruct / receipt',spH5d:'center instructions · replies',spNote:'Structured data demo · video never leaves the edge · no medical diagnosis',spRelayConfirm:'Relay mode needs python3 server.py first: run it, then open http://localhost:8000/split.html (another PC can connect via the LAN IP). Switch anyway?',spLblIncident:'ALERT',spLblCommand:'CMD',spLang:'EN'},
+ko:{spTitle:'ReMotion-K _ 작업 현장 · 경운대 분할 화면',spSub:'작업 현장 엣지 ⇄ 경운대 디지털 트윈 관제센터 · 구조화 데이터 링크 데모',spModeDemo:'데모',spModeRelay:'중계',spLayCols:'좌우',spLayRows:'상하',spSwap:'⇄ 바꾸기',spPaneA:'작업 현장 · ReMotion 엣지 AI',spPaneB:'경운대 관제센터 · 디지털 트윈',spH1:'twin',spH1d:'자세 좌표 · 5Hz',spH2:'vitals',spH2d:'생체 신호 · 1Hz',spH3:'incident',spH3d:'현장 경보',spH4:'hello',spH4d:'하트비트 · 공장 배치',spH5:'지시 / 접수',spH5d:'센터 지시 · 회신',spNote:'구조화 데이터 데모 · 영상은 엣지를 떠나지 않음 · 의료 진단 아님',spRelayConfirm:'중계 모드는 먼저 python3 server.py 를 실행한 뒤 http://localhost:8000/split.html 로 열어야 합니다(다른 PC는 LAN IP로 접속). 그래도 전환할까요?',spLblIncident:'경보',spLblCommand:'지시',spLang:'KO'}
+};
+const $=s=>document.querySelector(s),tr=k=>I[lang][k]||I.zh[k]||k;
+const LS={g:k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let lang='zh';
+let state=Object.assign({mode:'demo',layout:'cols',ra:.5,swap:false},LS.g('rm_split')||{});
+const MODES={
+ demo:{a:'index.html?edge=1',b:'center-twin.html'},
+ relay:{a:'index.html?edge=1&relay=1',b:'center-twin.html?relay=1'}
+};
+const LANES={twin:{i:0,c:'#38bdf8'},vitals:{i:1,c:'#22c55e'},incident:{i:2,c:'#ef4444'},hello:{i:3,c:'#a78bfa'},'center-hello':{i:4,c:'#f59e0b'},receipt:{i:4,c:'#f59e0b'},command:{i:4,c:'#f59e0b'}};
+const fa=$('#fa'),fb=$('#fb'),split=$('#split'),div=$('#div'),cv=$('#cv'),cx=cv.getContext('2d');
+let W=0,H=0,DPR=1;
+const pkts=[],pops=[],seen=new Map();
+const stats={a2b:0,b2a:0,ba2b:0,bb2a:0,win:[]};
+
+function save(){LS.s('rm_split',state)}
+function applyLang(){document.querySelectorAll('[data-i]').forEach(n=>{n.textContent=tr(n.dataset.i)});$('#langBtn').textContent=tr('spLang')}
+function applyMode(){const m=MODES[state.mode];const a=m.a,b=m.b;if(fa.getAttribute('src')!==a)fa.src=a;if(fb.getAttribute('src')!==b)fb.src=b;$('#mDemo').classList.toggle('on',state.mode==='demo');$('#mRelay').classList.toggle('on',state.mode==='relay');}
+function applyLayout(){split.className='split '+state.layout+(state.swap?' swap':'');split.style.setProperty('--ra',state.ra);div.setAttribute('aria-orientation',state.layout==='cols'?'vertical':'horizontal');$('#lCols').classList.toggle('on',state.layout==='cols');$('#lRows').classList.toggle('on',state.layout==='rows');document.querySelectorAll('[data-ra]').forEach(b=>b.classList.toggle('on',+b.dataset.ra===state.ra));resize();}
+function edgeFirst(){return !state.swap}   /* 边缘端是否在左/上 */
+
+/* ---- 数据包观察与转发（防环三重：只转 postMessage 路径 / 只转非源 / from:seq 去重） ---- */
+function observe(m){
+ if(!m||m.app!=='shinek-twin'||!m.type||!m.from||m.seq==null)return;
+ const k=m.from+':'+m.seq;if(seen.has(k))return;seen.set(k,1);if(seen.size>5000)seen.delete(seen.keys().next().value);
+ const dir=m.role==='center'?'b2a':'a2b';
+ if(dir==='a2b'){stats.a2b++;stats.ba2b+=m.bytes||0}else{stats.b2a++;stats.bb2a+=m.bytes||0}
+ stats.win.push({t:performance.now(),dir,bytes:m.bytes||0});
+ if(stats.win.length>400)stats.win.shift();
+ spawn(m);
+}
+window.addEventListener('message',e=>{
+ if(e.source===fa.contentWindow&&e.data&&e.data.app==='shinek-twin'){observe(e.data);try{fb.contentWindow.postMessage(e.data,'*')}catch(x){}}
+ else if(e.source===fb.contentWindow&&e.data&&e.data.app==='shinek-twin'){observe(e.data);try{fa.contentWindow.postMessage(e.data,'*')}catch(x){}}
+});
+try{const bc=new BroadcastChannel('shinek-twin');bc.onmessage=e=>observe(e.data)}catch(e){}
+
+/* ---- 数据包动画 ---- */
+function spawn(m){
+ const L=LANES[m.type];if(!L)return;
+ const big=m.type==='incident'||m.type==='command';
+ const label=m.type==='incident'?tr('spLblIncident'):m.type==='command'?tr('spLblCommand'):'';
+ const cols=state.layout==='cols';
+ const fromEdge=(m.role!=='center')===edgeFirst();   /* 起点在边缘端一侧 */
+ const x1=fromEdge?W+10:-10,y1=fromEdge?H+10:-10;
+ pkts.push({x0:cols?(fromEdge?-10:W+10):W/2,y0:cols?0:(fromEdge?-10:H+10),x1:cols?x1:W/2,y1:cols?0:y1,color:L.c,big,label,lane:L.i,t0:performance.now(),dur:big?2100:1700,prev:null});
+}
+function lanePos(i,cols){const n=5,t=cols?H:W,pad=t*0.13,step=(t-pad*2)/(n-1);return pad+i*step}
+function divPos(){const r=state.ra,e=edgeFirst();return state.layout==='cols'?(e?W*r:W*(1-r)):(e?H*r:H*(1-r))}
+function resize(){const r=$('.splitwrap').getBoundingClientRect();DPR=window.devicePixelRatio||1;W=r.width;H=r.height;cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cx.setTransform(DPR,0,0,DPR,0,0)}
+function frame(now){
+ cx.clearRect(0,0,W,H);
+ const cols=state.layout==='cols';
+ /* 5 条淡色管道 */
+ for(let i=0;i<5;i++){const p=lanePos(i,cols),c=['#38bdf8','#22c55e','#ef4444','#a78bfa','#f59e0b'][i];
+  cx.strokeStyle=c+'14';cx.lineWidth=1;cx.beginPath();if(cols){cx.moveTo(0,p);cx.lineTo(W,p)}else{cx.moveTo(p,0);cx.lineTo(p,H)}cx.stroke();}
+ /* 包 */
+ const dv=divPos();
+ for(let i=pkts.length-1;i>=0;i--){const p=pkts[i],t=(now-p.t0)/p.dur;
+  if(t>=1){pkts.splice(i,1);continue}
+  const e=t*t*(3-2*t),pos=cols?p.x0+(p.x1-p.x0)*e:p.y0+(p.y1-p.y0)*e;
+  const lp=lanePos(p.lane,cols);
+  const x=cols?pos:lp,y=cols?lp:pos;
+  cx.fillStyle=p.color;cx.beginPath();cx.arc(x,y,p.big?5:2.5,0,7);cx.fill();
+  if(p.big){cx.strokeStyle=p.color+'66';cx.lineWidth=1.5;cx.beginPath();cx.arc(x,y,9+t*6,0,7);cx.stroke();cx.fillStyle=p.color;cx.font='700 9px Inter,"Microsoft Yahei",sans-serif';cx.textAlign='center';const lx=Math.min(Math.max(x,30),W-30);const ly=Math.max(10,y-13);cx.fillText(p.label,lx,ly)}
+  /* 穿界爆炸（跨越分割线瞬间） */
+  if(p.prev!=null&&(p.prev-dv)*(pos-dv)<=0&&Math.abs(pos-dv)<40)pops.push({x,y,color:p.color,t0:now});
+  p.prev=pos;
+ }
+ /* 爆炸 */
+ for(let i=pops.length-1;i>=0;i--){const p=pops[i],t=(now-p.t0)/600;if(t>=1){pops.splice(i,1);continue}cx.strokeStyle=p.color+Math.round((1-t)*160).toString(16).padStart(2,'0');cx.lineWidth=2;cx.beginPath();cx.arc(p.x,p.y,4+t*14,0,7);cx.stroke();}
+ requestAnimationFrame(frame);
+}
+/* 流量芯片（4s 滑窗，500ms 刷新） */
+setInterval(()=>{const now=performance.now();const w=stats.win.filter(x=>now-x.t<4000);const pps=(w.length/4).toFixed(1),kbps=(w.reduce((s,x)=>s+x.bytes,0)/4/1024).toFixed(1);$('#flowTxt').textContent='⤳ '+pps+' pkt/s · '+kbps+' KB/s · A→B '+stats.a2b+' · B→A '+stats.b2a},500);
+
+/* ---- 分隔条 ---- */
+let dragOn=false;
+function raFrom(e){const r=split.getBoundingClientRect();let v=state.layout==='cols'?(e.clientX-r.left)/r.width:(e.clientY-r.top)/r.height;return Math.min(.75,Math.max(.25,v))}
+div.addEventListener('pointerdown',e=>{dragOn=true;div.setPointerCapture(e.pointerId)});
+div.addEventListener('pointermove',e=>{if(!dragOn)return;state.ra=+raFrom(e).toFixed(2);split.style.setProperty('--ra',state.ra)});
+div.addEventListener('pointerup',e=>{if(dragOn){dragOn=false;save();document.querySelectorAll('[data-ra]').forEach(b=>b.classList.toggle('on',+b.dataset.ra===state.ra))}});
+div.addEventListener('dblclick',()=>{state.ra=.5;applyLayout();save()});
+div.addEventListener('keydown',e=>{const d=e.key==='ArrowLeft'||e.key==='ArrowUp'?-0.02:e.key==='ArrowRight'||e.key==='ArrowDown'?0.02:0;if(d){e.preventDefault();state.ra=+Math.min(.75,Math.max(.25,state.ra+d)).toFixed(2);split.style.setProperty('--ra',state.ra);save()}});
+
+/* ---- 控件 ---- */
+$('#mDemo').onclick=()=>{state.mode='demo';applyMode();save()};
+$('#mRelay').onclick=()=>{if(state.mode==='relay')return;if(location.protocol==='file:'&&!confirm(tr('spRelayConfirm')))return;state.mode='relay';applyMode();save()};
+$('#lCols').onclick=()=>{state.layout='cols';applyLayout();save()};
+$('#lRows').onclick=()=>{state.layout='rows';applyLayout();save()};
+document.querySelectorAll('[data-ra]').forEach(b=>b.onclick=()=>{state.ra=+b.dataset.ra;applyLayout();save()});
+$('#swapBtn').onclick=()=>{state.swap=!state.swap;applyLayout();save()};
+$('#langBtn').onclick=()=>{lang=lang==='zh'?'en':lang==='en'?'ko':'zh';applyLang()};
+window.addEventListener('resize',resize);
+
+applyLang();applyMode();applyLayout();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
