@@ -63,10 +63,36 @@ body:not(.mode-rehab) .clinic,body:not(.mode-rehab) .topstats,body:not(.mode-reh
 .ind-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.ind-btn.pri{background:var(--navy);color:#fff;border-color:var(--navy);flex:1 1 180px;min-height:48px;font-size:16px}
 .ind-tools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.ind-tools .ind-btn{font-size:13px;padding:0 10px}
 @media (prefers-reduced-motion:reduce){.ind-meter i{transition:none}}
+</style>
 <style>
 /* ===== ReMotion-K × 庆云大学控制中心 · 企业现场边缘端模式 ===== */
 .is-edge .showcase-hero,.is-edge .principles,.is-edge .contest-footer,.is-edge .side-nav,.is-edge .modebar{display:none}
 .is-edge .app{padding-left:0;padding-bottom:0}
+/* 分屏嵌入：精简布局，一屏看全（摄像头 + 告警 + 工位图） */
+.is-edge .subbar{display:none}
+.is-edge #trend{display:none}
+.is-edge #skeleton{display:none}
+.is-edge #cfgBox,.is-edge #yoloBox{display:none}
+.is-edge .vision-launch{display:none}
+.is-edge .mgr-kpis{display:none}
+.is-edge #manager{margin:8px 12px!important}
+.is-edge #manager .ph{display:none}
+.is-edge #manager .ind-tools{margin-bottom:0}
+.is-edge #manager .pb{padding:10px 12px}
+.is-edge #industry{margin:8px 12px!important}
+.is-edge #industry .ph{display:none}
+.is-edge .ind-top{margin-bottom:8px}
+.is-edge .ind-top .ind-note{display:none}
+.is-edge .ind-grid{grid-template-columns:minmax(0,1.3fr) minmax(200px,1fr);grid-template-areas:"cam map" "feed feed";gap:10px;align-items:start}
+.is-edge .ind-stage{aspect-ratio:auto;height:200px}
+.is-edge .ind-stage video,.is-edge .ind-stage canvas{object-fit:contain;background:#000}
+.is-edge .alerts{max-height:120px;overflow:auto}
+.is-edge .ind-row{margin-top:6px}
+.is-edge .ind-grid .ind-note{display:none}
+.is-edge header{padding:6px 14px;min-height:0}
+.is-edge header .mark{width:28px;height:28px;font-size:13px}
+.is-edge header .brand b,.is-edge header .brand small{display:none}
+@media (max-width:520px){.is-edge .ind-grid{grid-template-columns:1fr;grid-template-areas:"cam" "feed" "map"}}
 #twinChip{display:inline-flex;align-items:center;gap:7px;margin-left:10px;padding:4px 11px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:11px;white-space:nowrap}
 #twinChip .tc-dot{width:8px;height:8px;border-radius:50%;background:#a6b0be;flex:0 0 auto}
 #twinChip.on{color:var(--green);border-color:#31be8c}
@@ -325,9 +351,17 @@ TW.on(function(m){
 });
 if(EDGE){
  document.body.classList.add('is-edge');setMode('ind');
- const chip=document.createElement('span');chip.id='twinChip';chip.innerHTML='<span class="tc-dot"></span><span class="tc-txt"></span>';const sb=$('.subbar .right');if(sb)sb.after(chip);
+ const chip=document.createElement('span');chip.id='twinChip';chip.innerHTML='<span class="tc-dot"></span><span class="tc-txt"></span>';const hd=document.querySelector('header .toolbar');if(hd)hd.appendChild(chip);
  window.addEventListener('app:language-change',twinChip);
  sendHello();setInterval(sendHello,8000);setInterval(twinChip,4000);
+ /* 分屏嵌入自适应缩放：整页等比缩放到面板高度，一屏看全（0.6~1 倍） */
+ function fitPane(){try{
+  const zc=parseFloat(document.body.style.zoom)||1;
+  const H=(document.documentElement.scrollHeight/zc)||1;
+  const z=Math.min(1,Math.max(.6,innerHeight/H));
+  document.body.style.zoom=String(z);
+ }catch(e){}}
+ window.addEventListener('resize',fitPane);setInterval(fitPane,1500);setTimeout(fitPane,500);setTimeout(fitPane,1500);
  /* 无摄像头时的合成演示遥测：3 名工人在工位附近移动（250ms 一次） */
  setInterval(function(){if(stream)return;const t=Date.now()/1000;const zn=ind.zone;
   const mk=function(id,sx,sy,rx,ry,ln,hm2){const x=sx+rx*Math.sin(t/2.2+rx*7),y=sy+ry*Math.cos(t/1.7+ry*5);return{id:id,x:+x.toFixed(3),y:+y.toFixed(3),lean:Math.round(ln+3*Math.sin(t+rx)),inZone:!!(zn&&x>zn.x&&x<zn.x+zn.w&&y>zn.y&&y<zn.y+zn.h),helmet:hm2};};
