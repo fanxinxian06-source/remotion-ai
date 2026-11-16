@@ -33,19 +33,19 @@ button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
 .pane-tag{position:absolute;top:10px;left:12px;z-index:7;pointer-events:none;background:#0d1a2ecc;border:1px solid #2a4166;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:800;color:#bcd0e8}
 .pane-tag i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;background:#5fe1d0}
 .pane-b .pane-tag i{background:#a78bfa}
-/* 左右布局 */
+/* 左右布局：比例作用在"面板"上，iframe 只负责填满面板 */
 .split.cols{flex-direction:row}
-.split.cols #fa{width:calc(var(--ra,.5)*100% - 6px);order:1}
+.split.cols #pa{flex:0 0 calc(var(--ra,.5)*100% - 6px);order:1}
 .split.cols .div{width:12px;height:100%;order:2;cursor:col-resize}
-.split.cols #fb{flex:1;order:3}
+.split.cols #pb{flex:1;order:3}
 /* 上下布局 */
 .split.rows{flex-direction:column}
-.split.rows #fa{height:calc(var(--ra,.5)*100% - 6px);order:1}
+.split.rows #pa{flex:0 0 calc(var(--ra,.5)*100% - 6px);order:1}
 .split.rows .div{height:12px;width:100%;order:2;cursor:row-resize}
-.split.rows #fb{flex:1;order:3}
-/* 交换：不移动 iframe DOM，只换视觉顺序（摄像头不丢） */
-.split.swap.cols #fa{order:3}.split.swap.cols #fb{order:1}
-.split.swap.rows #fa{order:3}.split.swap.rows #fb{order:1}
+.split.rows #pb{flex:1;order:3}
+/* 交换：不移动 iframe DOM，只换面板视觉顺序（摄像头不丢） */
+.split.swap.cols #pa{order:3}.split.swap.cols #pb{order:1}
+.split.swap.rows #pa{order:3}.split.swap.rows #pb{order:1}
 .div{background:linear-gradient(90deg,#1e2c44,#2f4a70 50%,#1e2c44);background-size:200% 100%;animation:divglow 3s linear infinite;position:relative;z-index:9;display:flex;align-items:center;justify-content:center}
 .rows .div{background:linear-gradient(180deg,#1e2c44,#2f4a70 50%,#1e2c44);background-size:100% 200%}
 @keyframes divglow{0%{background-position:0 0}100%{background-position:200% 0}}
@@ -101,7 +101,9 @@ ko:{spTitle:'ReMotion-K _ 작업 현장 · 경운대 분할 화면',spSub:'작�
 const $=s=>document.querySelector(s),tr=k=>I[lang][k]||I.zh[k]||k;
 const LS={g:k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let lang='zh';
-let state=Object.assign({mode:'demo',layout:'cols',ra:.5,swap:false},LS.g('rm_split')||{});
+/* 每次打开固定 50/50：企业现场在左、庆云大学在右（比例与交换位置不持久化） */
+const _saved=LS.g('rm_split')||{};
+let state={mode:_saved.mode||'demo',layout:_saved.layout||'cols',ra:.5,swap:false};
 const MODES={
  demo:{a:'index.html?edge=1',b:'center-twin.html'},
  relay:{a:'index.html?edge=1&relay=1',b:'center-twin.html?relay=1'}
@@ -112,7 +114,7 @@ let W=0,H=0,DPR=1;
 const pkts=[],pops=[],seen=new Map();
 const stats={a2b:0,b2a:0,ba2b:0,bb2a:0,win:[]};
 
-function save(){LS.s('rm_split',state)}
+function save(){LS.s('rm_split',{mode:state.mode,layout:state.layout})}
 function applyLang(){document.querySelectorAll('[data-i]').forEach(n=>{n.textContent=tr(n.dataset.i)});$('#langBtn').textContent=tr('spLang')}
 function applyMode(){const m=MODES[state.mode];const a=m.a,b=m.b;if(fa.getAttribute('src')!==a)fa.src=a;if(fb.getAttribute('src')!==b)fb.src=b;$('#mDemo').classList.toggle('on',state.mode==='demo');$('#mRelay').classList.toggle('on',state.mode==='relay');}
 function applyLayout(){split.className='split '+state.layout+(state.swap?' swap':'');split.style.setProperty('--ra',state.ra);div.setAttribute('aria-orientation',state.layout==='cols'?'vertical':'horizontal');$('#lCols').classList.toggle('on',state.layout==='cols');$('#lRows').classList.toggle('on',state.layout==='rows');document.querySelectorAll('[data-ra]').forEach(b=>b.classList.toggle('on',+b.dataset.ra===state.ra));resize();}
