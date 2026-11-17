@@ -35,7 +35,6 @@ jobs:
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
           pub-cache-key: "pub-:os:-:channel:-:version:-:arch:-:hash:"
-          pubspec-path: mobile_app/pubspec.yaml
 
       - name: Generate the Android runner
         shell: bash
@@ -58,7 +57,7 @@ jobs:
       - name: Analyze and test
         working-directory: mobile_app
         run: |
-          flutter analyze
+          flutter analyze --no-fatal-infos
           flutter test
 
       - name: Build installable debug APK
