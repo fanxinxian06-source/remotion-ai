@@ -49,23 +49,6 @@ jobs:
           mkdir -p mobile_app/android
           cp -R "$RUNNER_TEMP/flutter_android_runner/android/." mobile_app/android/
           cp "$RUNNER_TEMP/AndroidManifest.xml" mobile_app/android/app/src/main/AndroidManifest.xml
-          BUILD_FILE=mobile_app/android/app/build.gradle.kts
-          if ! grep -q 'compileSdk = flutter.compileSdkVersion' "$BUILD_FILE"; then
-            echo "Unexpected Flutter Android template: compileSdk setting not found."
-            exit 1
-          fi
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 37/' "$BUILD_FILE"
-
-      - name: Install Android SDK 37
-        shell: bash
-        run: |
-          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
-          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -print -quit)"
-          if [ -z "$SDKMANAGER" ]; then
-            echo "Android SDK command-line tools were not found under $SDK_ROOT."
-            exit 1
-          fi
-          "$SDKMANAGER" --channel=3 --install "platforms;android-37"
 
       - name: Resolve dependencies
         working-directory: mobile_app

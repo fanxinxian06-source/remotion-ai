@@ -11,13 +11,17 @@ dependencies:
   flutter:
     sdk: flutter
   device_info_plus: ^11.3.0
-  flutter_reactive_ble: ^5.3.1
+  flutter_reactive_ble: 5.5.0
   newert_vitaltrack: ^1.1.0
   permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+dependency_overrides:
+  reactive_ble_mobile: 5.5.0
+  reactive_ble_platform_interface: 5.5.0
 
 flutter:
   uses-material-design: true
