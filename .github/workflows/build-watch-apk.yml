@@ -33,8 +33,8 @@ jobs:
         with:
           channel: stable
           cache: true
-          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
-          pub-cache-key: pub-:os:-:channel:-:version:-:arch:-:hash:
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache-key: "pub-:os:-:channel:-:version:-:arch:-:hash:"
           pubspec-path: mobile_app/pubspec.yaml
 
       - name: Generate the Android runner
