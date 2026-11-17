@@ -5,6 +5,10 @@ on:
     paths:
       - "mobile_app/**"
       - ".github/workflows/build-watch-apk.yml"
+  pull_request:
+    paths:
+      - "mobile_app/**"
+      - ".github/workflows/build-watch-apk.yml"
   workflow_dispatch:
 
 permissions:
