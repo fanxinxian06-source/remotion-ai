@@ -54,6 +54,16 @@ jobs:
         working-directory: mobile_app
         run: flutter pub get
 
+      - name: Set BLE plugin compile SDK
+        shell: bash
+        run: |
+          BLE_GRADLE="$PUB_CACHE/hosted/pub.dev/reactive_ble_mobile-5.5.0/android/build.gradle"
+          if ! grep -q 'compileSdkVersion 33' "$BLE_GRADLE"; then
+            echo "Unexpected reactive_ble_mobile 5.5.0 Android build configuration."
+            exit 1
+          fi
+          sed -i 's/compileSdkVersion 33/compileSdkVersion 36/' "$BLE_GRADLE"
+
       - name: Analyze and test
         working-directory: mobile_app
         run: |
