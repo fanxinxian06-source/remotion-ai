@@ -1,0 +1,74 @@
+name: Build watch companion APK
+
+on:
+  push:
+    paths:
+      - "mobile_app/**"
+      - ".github/workflows/build-watch-apk.yml"
+  pull_request:
+    paths:
+      - "mobile_app/**"
+      - ".github/workflows/build-watch-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+          cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
+          pub-cache-key: pub-:os:-:channel:-:version:-:arch:-:hash:
+          pubspec-path: mobile_app/pubspec.yaml
+
+      - name: Generate the Android runner
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/flutter_android_runner"
+          cp mobile_app/android/app/src/main/AndroidManifest.xml "$RUNNER_TEMP/AndroidManifest.xml"
+          flutter create \
+            --platforms=android \
+            --project-name=smartfactory_guard \
+            --org=com.remotion \
+            "$RUNNER_TEMP/flutter_android_runner"
+          mkdir -p mobile_app/android
+          cp -R "$RUNNER_TEMP/flutter_android_runner/android/." mobile_app/android/
+          cp "$RUNNER_TEMP/AndroidManifest.xml" mobile_app/android/app/src/main/AndroidManifest.xml
+
+      - name: Resolve dependencies
+        working-directory: mobile_app
+        run: flutter pub get
+
+      - name: Analyze and test
+        working-directory: mobile_app
+        run: |
+          flutter analyze
+          flutter test
+
+      - name: Build installable debug APK
+        working-directory: mobile_app
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: remotion-watch-app-debug
+          path: mobile_app/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
