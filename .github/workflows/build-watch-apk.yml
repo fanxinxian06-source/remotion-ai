@@ -1,6 +1,6 @@
 name: Build watch companion APK
 
-on:
+"on":
   push:
     paths:
       - "mobile_app/**"
