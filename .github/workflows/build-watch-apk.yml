@@ -65,7 +65,7 @@ jobs:
             echo "Android SDK command-line tools were not found under $SDK_ROOT."
             exit 1
           fi
-          "$SDKMANAGER" --install "platforms;android-37"
+          "$SDKMANAGER" --channel=3 --install "platforms;android-37"
 
       - name: Resolve dependencies
         working-directory: mobile_app
