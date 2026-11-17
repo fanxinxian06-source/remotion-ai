@@ -57,7 +57,15 @@ jobs:
           sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 37/' "$BUILD_FILE"
 
       - name: Install Android SDK 37
-        run: sdkmanager --install "platforms;android-37"
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -print -quit)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "Android SDK command-line tools were not found under $SDK_ROOT."
+            exit 1
+          fi
+          "$SDKMANAGER" --install "platforms;android-37"
 
       - name: Resolve dependencies
         working-directory: mobile_app
