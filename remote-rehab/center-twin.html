@@ -5,7 +5,7 @@
 <meta name="description" content="庆云大学数字孪生控制中心：仅接收企业现场的结构化遥测（坐标 · 体征 · 告警），原始视频不出边缘端。">
 <title>庆云大学 · 数字孪生控制中心 | ReMotion-K</title>
 <style>
-:root{--bg:#070d17;--panel:#0e1626;--panel2:#121d31;--line:#1e2c44;--ink:#e8f0fb;--muted:#8fa2bd;--cy:#38bdf8;--gr:#22c55e;--rd:#ef4444;--am:#f59e0b;--pu:#a78bfa}
+:root{--bg:#f2f5f9;--panel:#fff;--panel2:#f7f9fc;--line:#d5dfeb;--ink:#17324c;--muted:#627991;--cy:#168f8b;--gr:#15975f;--rd:#df4f59;--am:#d18b18;--pu:#7964c2}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Segoe UI","Microsoft Yahei","Malgun Gothic",sans-serif}
 button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0a1424,#0d1a2e);flex-wrap:wrap}
@@ -14,11 +14,18 @@ header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:
 .chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:5px 12px;font-size:11px;color:var(--muted);white-space:nowrap}
 .chip i{width:8px;height:8px;border-radius:50%;background:#5b6b80;flex:0 0 auto}
 .chip.on{color:var(--gr);border-color:#22c55e55}.chip.on i{background:var(--gr);box-shadow:0 0 0 4px #22c55e22}
+.chip.backend-off{color:#fcd38d;border-color:#f59e0b66}.chip.backend-off i{background:#f59e0b}
 .spacer{flex:1}
 .clock{font-variant-numeric:tabular-nums;color:#bcd0e8;font-size:13px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;white-space:nowrap}
 .langbtn{width:40px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);font-weight:800}
 main{display:grid;grid-template-columns:1.3fr 1fr;gap:12px;padding:12px 16px 6px;align-items:start}
 @media(max-width:960px){main{grid-template-columns:1fr}}
+.backend-notice{margin:10px 16px 0;padding:9px 13px;border:1px solid #f0d39a;border-left:4px solid #d18b18;border-radius:10px;background:#fff8e9;color:#805719;font-size:12px}
+.summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;padding:10px 16px 0}
+.summary-card{min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:11px;background:var(--panel);box-shadow:0 2px 6px #19395708}
+.summary-card span{display:block;color:var(--muted);font-size:10px}
+.summary-card strong{display:block;margin-top:2px;color:var(--ink);font-size:20px;line-height:1.2;font-variant-numeric:tabular-nums}
+.summary-card small{display:block;margin-top:2px;color:var(--muted);font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
 .ph{padding:11px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800;font-size:13px}
 .ph small{font-weight:500;color:var(--muted);font-size:10px;margin-left:auto}
@@ -40,7 +47,7 @@ background-image:linear-gradient(#1c2c4433 1px,transparent 1px),linear-gradient(
 .wd .ring.fl{animation:flflash 1s ease-out infinite}@keyframes flflash{0%,100%{box-shadow:0 0 0 0 #ef444400}50%{box-shadow:0 0 0 6px #ef444466}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--muted);align-items:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.legend .lg{background:#4ade80}.legend .lr{background:#f87171}.legend .lz{border:2px solid var(--am);background:transparent}.legend .lk{background:#7c8ea6}
+.legend .lg{background:#4ade80}.legend .lr{background:#f87171}.legend .lz{border:2px solid var(--am);background:transparent}.legend .lk{background:#7c8ea6}.legend .ls{background:var(--cy)}
 .rcol{display:flex;flex-direction:column;gap:12px;min-width:0}
 .vit{width:100%;border-collapse:collapse;font-size:12px}
 .vit th{color:var(--muted);font-weight:600;font-size:10px;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -72,6 +79,36 @@ background-image:linear-gradient(#1c2c4433 1px,transparent 1px),linear-gradient(
 footer{padding:10px 18px 14px;color:var(--muted);font-size:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 footer b{color:#a9bdd6}
 @media print{header,footer,.legend{display:none}main{padding:0}}
+/* Reference-inspired light control-room dashboard. */
+header{background:#fff;box-shadow:0 2px 8px #18344b0c}
+.mark{background:linear-gradient(145deg,#36c9b8,#44a7e8);color:#07314a}
+.chip{background:#f7f9fc}
+.chip.on{color:#147c54;border-color:#94dfba}.chip.on i{background:#22ad70;box-shadow:0 0 0 4px #22ad7022}
+.chip.backend-off{color:#95600b;border-color:#f1d59d;background:#fff8e9}.chip.backend-off i{background:#d18b18}
+.clock{background:#f6f9fc;color:#365774;border-color:var(--line)}
+.langbtn{background:#f6f9fc;color:var(--ink);border-color:var(--line)}
+.panel{box-shadow:0 3px 12px #1939570a}
+.map{background:#f8fafc;background-image:linear-gradient(#d7e2ec88 1px,transparent 1px),linear-gradient(90deg,#d7e2ec88 1px,transparent 1px);background-size:32px 32px}
+.st{border-color:#b9d8d6;background:#e6f4f2;color:#205565}
+.st small{color:#60808c}
+.wd .ring{border-color:#8c9cac;background:#fff}
+.wd .ring.g{background:#e5f7ed;border-color:var(--gr)}.wd .ring.r{background:#fff0f0;border-color:var(--rd)}
+.wd .dot{background:#8798a9}.wd .ring.g .dot{background:#28a66c}.wd .ring.r .dot{background:#e85d65}
+.wd .wl{color:#365774;background:#fff;border-color:#d5dfeb}
+.vit td{border-bottom-color:#e7edf3}
+.wtag{background:#edf5fb;border-color:#d3e2ef;color:#315b7b}
+.helm i{background:#8c9cac}
+.inc{background:#f8fafc}
+.inc p{color:#4b6176}
+.ic-bt button{background:#fff;border-color:#d3deea;color:#274662}
+.ic-bt button.primary{background:#e7f5f4;border-color:#9bd7d1;color:#087e76}
+.ic-bt input{background:#fff;border-color:#cad7e5;color:var(--ink)}
+.log .le{border-bottom-color:#e1e9f1}
+footer b{color:#365774}
+.map-views{display:flex;gap:4px;margin-left:auto}
+.map-views button{border:1px solid #d5dfeb;background:#fff;color:#365774;border-radius:7px;padding:4px 8px;font-size:10px;font-weight:700}
+.map-views button.on{border-color:#0b978d;background:#0b978d;color:#fff}
+@media(max-width:700px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px 10px 0}.backend-notice{margin:9px 10px 0}main{padding:10px}.ph{flex-wrap:wrap}.map-views{order:3;width:100%;margin-left:0}}
 </style>
 </head>
 <body>
@@ -79,15 +116,23 @@ footer b{color:#a9bdd6}
  <div class="mark">K</div>
  <div class="brand"><b data-i="ctTitle">庆云大学 · 数字孪生控制中心</b><small data-i="ctSub">ReMotion-K 企业现场 ⇄ 数字孪生 · 仅结构化数据 · 无视频</small></div>
  <div class="spacer"></div>
+ <span class="chip backend-off" role="status"><i></i><span data-i="ctBackendOffline">庆云大学后台 · 未接入</span></span>
  <span class="chip" id="connChip"><i></i><span id="connTxt" data-i="ctOffline">企业现场边缘端 · 未连接</span></span>
  <span class="clock" id="clock">--:--:--</span>
  <button class="langbtn" id="langBtn" aria-label="切换语言">中</button>
 </header>
+<div class="backend-notice" role="note" data-i="ctBackendNotice">未配置或连接庆云大学业务后台。本页只接收浏览器边缘端或本地中继数据；指示、签收和日志仅保存在当前页面内存中，刷新后会丢失，后台无法查询或管理。</div>
+<section class="summary-grid" aria-label="现场实时摘要">
+ <div class="summary-card"><span data-i="ctMetricWorkers">现场在线</span><strong id="metricOnline">0</strong><small id="metricSource">等待现场连接</small></div>
+ <div class="summary-card"><span data-i="ctMetricAlerts">待确认告警</span><strong id="metricAlerts">0</strong><small data-i="ctMetricAlertsNote">当前页面收到</small></div>
+ <div class="summary-card"><span data-i="ctMetricRisk">现场风险参考</span><strong id="metricRisk">—</strong><small data-i="ctMetricRiskNote">以边缘端上报为准</small></div>
+ <div class="summary-card"><span data-i="ctMetricFresh">最近收到数据</span><strong id="metricFresh">—</strong><small data-i="ctMetricLocal">浏览器 / 本地中继</small></div>
+</section>
 <main>
  <section class="panel" aria-label="map">
-  <div class="ph"><span data-i="ctMapT">厂区平面 · 数字孪生</span><small id="mapMeta">—</small></div>
+  <div class="ph"><span data-i="ctMapT">厂区平面 · 数字孪生</span><small id="mapMeta">—</small><div class="map-views" role="group" aria-label="数字孪生视图"><button class="on" data-map-view="all" aria-pressed="true" data-i="ctViewAll">人员 + 厂区</button><button data-map-view="people" aria-pressed="false" data-i="ctViewPeople">人员视图</button><button data-map-view="floor" aria-pressed="false" data-i="ctViewFloor">厂区平面</button></div></div>
   <div class="mapwrap"><div class="map" id="map"></div>
-  <div class="legend"><span><i class="lg"></i><span data-i="ctHelmYes">安全帽 · 已戴</span></span><span><i class="lr"></i><span data-i="ctHelmNo">安全帽 · 未戴</span></span><span><i class="lk"></i><span data-i="ctHelmUnk">安全帽 · 未知</span></span><span><i class="lz"></i><span data-i="ctZone">危险区域</span></span><span data-i="ctTrail">尾迹 = 最近移动轨迹</span></div></div>
+  <div class="legend"><span><i class="lg"></i><span data-i="ctHelmYes">安全帽 · 已戴</span></span><span><i class="lr"></i><span data-i="ctHelmNo">安全帽 · 未戴</span></span><span><i class="lk"></i><span data-i="ctHelmUnk">安全帽 · 未知</span></span><span><i class="ls"></i><span data-i="ctSkeleton">姿态骨骼 · 关键点</span></span><span><i class="lz"></i><span data-i="ctZone">危险区域</span></span><span data-i="ctTrail">尾迹 = 最近移动轨迹</span></div></div>
  </section>
  <div class="rcol">
   <section class="panel" aria-label="vitals">
@@ -104,23 +149,34 @@ footer b{color:#a9bdd6}
   </section>
  </div>
 </main>
-<footer><span><b data-i="ctPrivacyB">仅接收结构化数据</b> · <span data-i="ctPrivacy">坐标 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核</span></span><span data-i="ctDemo">演示用合成数据 · 无医疗诊断</span></footer>
+<footer><span><b data-i="ctPrivacyB">仅接收结构化数据</b> · <span data-i="ctPrivacy">坐标 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核</span></span><span data-i="ctDemo">演示用合成数据 · 未同步到庆云大学后台 · 无医疗诊断</span></footer>
 <script src="twin-link.js"></script>
 <script>
 'use strict';
 /* ===== 庆云大学 · 数字孪生控制中心（classic script，file:// 可用） ===== */
 const I={
-zh:{ctTitle:'庆云大学 · 数字孪生控制中心',ctSub:'ReMotion-K 企业现场 ⇄ 数字孪生 · 仅结构化数据 · 无视频',ctOnline:'企业现场边缘端 · 已连接',ctOffline:'企业现场边缘端 · 未连接',ctRelay:'中继模式',ctMapT:'厂区平面 · 数字孪生',ctVitalsT:'现场体征（合成 / 穿戴）',ctWorker:'工人',ctHr:'心率',ctTemp:'体温',ctBp:'血压',ctLean:'倾斜',ctHelmC:'安全帽',ctStation:'工位',ctSeen:'最后在线',ctQueueT:'告警队列',ctLogT:'指示日志',ctLogSub:'等待现场确认回执',ctEmptyLog:'尚无指示',ctEmpty:'暂无告警',ctPrivacyB:'仅接收结构化数据',ctPrivacy:'坐标 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核',ctDemo:'演示用合成数据 · 无医疗诊断',ctHelmYes:'安全帽 · 已戴',ctHelmNo:'安全帽 · 未戴',ctHelmUnk:'安全帽 · 未知',ctZone:'危险区域',ctTrail:'尾迹 = 最近移动轨迹',ctRisk:'现场风险',ctAck:'签收',ctAcked:'已签收',ctInstruct:'指示',ctCmdPh:'输入指示内容…',ctCmdSend:'发送指示',ctCmdSent:'指示已发送',ctWaitAck:'等待现场回执',ctRecv:'现场已回执',ctZoneK:'区域闯入',ctFallK:'疑似跌倒',ctHelmetK:'未戴安全帽',ctLeanK:'姿态负荷',ctManualK:'手动上报',ctSt1:'冲压工位',ctSt2:'组装工位',ctSt3:'恢复训练区',ctSt4:'搬运通道',ctOff:'离线',ctOn:'在线',ctDemoTag:'合成数据',ctNoVitals:'尚无体征数据',ctLang:'中'},
-en:{ctTitle:'Kyungwoon Univ. · Digital Twin Control Center',ctSub:'ReMotion-K worksite ⇄ digital twin · structured data only · no video',ctOnline:'Worksite edge · connected',ctOffline:'Worksite edge · offline',ctRelay:'relay mode',ctMapT:'Floor plan · digital twin',ctVitalsT:'Worksite vitals (synthetic / wearable)',ctWorker:'Worker',ctHr:'HR',ctTemp:'Temp',ctBp:'BP',ctLean:'Lean',ctHelmC:'Helmet',ctStation:'Station',ctSeen:'Seen',ctQueueT:'Alert queue',ctLogT:'Instruction log',ctLogSub:'Awaiting worksite confirmation',ctEmptyLog:'No instructions yet',ctEmpty:'No open alerts',ctPrivacyB:'Structured data only',ctPrivacy:'coordinates · vitals · alerts. Raw video never leaves the edge · no identification · cues reviewed by professionals',ctDemo:'Synthetic demo data · no medical diagnosis',ctHelmYes:'Helmet · worn',ctHelmNo:'Helmet · missing',ctHelmUnk:'Helmet · unknown',ctZone:'Danger zone',ctTrail:'Trail = recent movement',ctRisk:'Site risk',ctAck:'Sign off',ctAcked:'Signed off',ctInstruct:'Instruct',ctCmdPh:'Type an instruction…',ctCmdSend:'Send instruction',ctCmdSent:'Instruction sent',ctWaitAck:'awaiting worksite reply',ctRecv:'Worksite confirmed',ctZoneK:'Zone entry',ctFallK:'Suspected fall',ctHelmetK:'No helmet',ctLeanK:'Posture load',ctManualK:'Manual report',ctSt1:'Press',ctSt2:'Assembly',ctSt3:'Recovery zone',ctSt4:'Transport aisle',ctOff:'offline',ctOn:'online',ctDemoTag:'SYNTHETIC',ctNoVitals:'No vital data yet',ctLang:'EN'},
-ko:{ctTitle:'경운대학교 · 디지털 트윈 관제센터',ctSub:'ReMotion-K 작업 현장 ⇄ 디지털 트윈 · 구조화 데이터만 · 영상 없음',ctOnline:'작업 현장 엣지 · 연결됨',ctOffline:'작업 현장 엣지 · 미연결',ctRelay:'중계 모드',ctMapT:'공장 평면 · 디지털 트윈',ctVitalsT:'현장 생체 신호 (합성 / 웨어러블)',ctWorker:'작업자',ctHr:'심박',ctTemp:'체온',ctBp:'혈압',ctLean:'기울기',ctHelmC:'안전모',ctStation:'구역',ctSeen:'최근 수신',ctQueueT:'경보 대기열',ctLogT:'지시 기록',ctLogSub:'현장 확인 대기 중',ctEmptyLog:'지시 내역이 없습니다',ctEmpty:'미처리 경보가 없습니다',ctPrivacyB:'구조화 데이터만 수신',ctPrivacy:'좌표 · 생체 신호 · 경보. 원본 영상은 엣지를 떠나지 않습니다 · 신원 미식별 · 전문가가 검토합니다',ctDemo:'합성 데모 데이터 · 의료 진단 아님',ctHelmYes:'안전모 · 착용',ctHelmNo:'안전모 · 미착용',ctHelmUnk:'안전모 · 알 수 없음',ctZone:'위험 구역',ctTrail:'궤적 = 최근 이동',ctRisk:'현장 위험도',ctAck:'접수',ctAcked:'접수됨',ctInstruct:'지시',ctCmdPh:'지시 내용 입력…',ctCmdSend:'지시 전송',ctCmdSent:'지시 전송됨',ctWaitAck:'현장 회신 대기',ctRecv:'현장 확인 완료',ctZoneK:'구역 진입',ctFallK:'낙상 의심',ctHelmetK:'안전모 미착용',ctLeanK:'자세 부하',ctManualK:'수동 보고',ctSt1:'프레스',ctSt2:'조립',ctSt3:'회복 훈련 구역',ctSt4:'운반 통로',ctOff:'오프라인',ctOn:'온라인',ctDemoTag:'합성 데이터',ctNoVitals:'생체 데이터 없음',ctLang:'KO'}
+zh:{ctTitle:'庆云大学 · 数字孪生控制中心',ctSub:'ReMotion-K 企业现场 ⇄ 数字孪生 · 仅结构化数据 · 无视频',ctBackendOffline:'庆云大学后台 · 未接入',ctBackendNotice:'未配置或连接庆云大学业务后台。本页只接收浏览器边缘端或本地中继数据；指示、签收和日志仅保存在当前页面内存中，刷新后会丢失，后台无法查询或管理。',ctOnline:'企业现场边缘端 · 已连接',ctOffline:'企业现场边缘端 · 未连接',ctRelay:'本地中继',ctMapT:'厂区平面 · 数字孪生',ctVitalsT:'现场体征（合成 / 穿戴）',ctWorker:'工人',ctHr:'心率',ctTemp:'体温',ctBp:'血压',ctLean:'倾斜',ctHelmC:'安全帽',ctStation:'工位',ctSeen:'最后在线',ctQueueT:'告警队列',ctLogT:'指示日志',ctLogSub:'等待现场确认回执',ctEmptyLog:'尚无指示',ctEmpty:'暂无告警',ctPrivacyB:'仅接收结构化数据',ctPrivacy:'坐标 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核',ctDemo:'演示 / 现场数据 · 未同步到庆云大学后台 · 无医疗诊断',ctHelmYes:'安全帽 · 已戴',ctHelmNo:'安全帽 · 未戴',ctHelmUnk:'安全帽 · 未核验（不通过）',ctZone:'危险区域',ctTrail:'尾迹 = 最近移动轨迹',ctRisk:'现场风险',ctAck:'签收',ctAcked:'已签收',ctInstruct:'指示',ctCmdPh:'输入指示内容…',ctCmdSend:'发送指示',ctCmdSent:'指示已发送',ctWaitAck:'等待现场回执',ctRecv:'现场已回执',ctZoneK:'区域闯入',ctFallK:'疑似跌倒',ctHelmetK:'未戴安全帽',ctLeanK:'姿态负荷',ctManualK:'手动上报',ctSt1:'冲压工位',ctSt2:'组装工位',ctSt3:'恢复训练区',ctSt4:'搬运通道',ctOff:'离线',ctOn:'在线',ctDemoTag:'合成数据',ctNoVitals:'尚无体征数据',ctLang:'中'},
+en:{ctTitle:'Qingyun Univ. · Digital Twin Control Center',ctSub:'ReMotion-K worksite ⇄ digital twin · structured data only · no video',ctBackendOffline:'Qingyun backend · not connected',ctBackendNotice:'The Qingyun business backend is not configured or connected. This page only receives browser-edge or local-relay data; instructions, acknowledgments, and logs live only in this page’s memory, are lost on refresh, and cannot be queried or managed by the backend.',ctOnline:'Worksite edge · connected',ctOffline:'Worksite edge · offline',ctRelay:'local relay',ctMapT:'Floor plan · digital twin',ctVitalsT:'Worksite vitals (synthetic / wearable)',ctWorker:'Worker',ctHr:'HR',ctTemp:'Temp',ctBp:'BP',ctLean:'Lean',ctHelmC:'Helmet',ctStation:'Station',ctSeen:'Seen',ctQueueT:'Alert queue',ctLogT:'Instruction log',ctLogSub:'Awaiting worksite confirmation',ctEmptyLog:'No instructions yet',ctEmpty:'No open alerts',ctPrivacyB:'Structured data only',ctPrivacy:'coordinates · vitals · alerts. Raw video never leaves the edge · no identification · cues reviewed by professionals',ctDemo:'Demo / edge data · not synced to Qingyun backend · no medical diagnosis',ctHelmYes:'Helmet · worn',ctHelmNo:'Helmet · missing',ctHelmUnk:'Helmet · unverified (not passed)',ctZone:'Danger zone',ctTrail:'Trail = recent movement',ctRisk:'Site risk',ctAck:'Sign off',ctAcked:'Signed off',ctInstruct:'Instruct',ctCmdPh:'Type an instruction…',ctCmdSend:'Send instruction',ctCmdSent:'Instruction sent',ctWaitAck:'awaiting worksite reply',ctRecv:'Worksite confirmed',ctZoneK:'Zone entry',ctFallK:'Suspected fall',ctHelmetK:'No helmet',ctLeanK:'Posture load',ctManualK:'Manual report',ctSt1:'Press',ctSt2:'Assembly',ctSt3:'Recovery zone',ctSt4:'Transport aisle',ctOff:'offline',ctOn:'online',ctDemoTag:'SYNTHETIC',ctNoVitals:'No vital data yet',ctLang:'EN'},
+ko:{ctTitle:'칭윈대학교 · 디지털 트윈 관제센터',ctSub:'ReMotion-K 작업 현장 ⇄ 디지털 트윈 · 구조화 데이터만 · 영상 없음',ctBackendOffline:'칭윈대 백엔드 · 미연결',ctBackendNotice:'칭윈대 업무 백엔드가 구성되거나 연결되지 않았습니다. 이 페이지는 브라우저 엣지 또는 로컬 중계 데이터만 받습니다. 지시, 접수, 로그는 현재 페이지 메모리에만 있어 새로고침하면 사라지며 백엔드에서 조회하거나 관리할 수 없습니다.',ctOnline:'작업 현장 엣지 · 연결됨',ctOffline:'작업 현장 엣지 · 미연결',ctRelay:'로컬 중계',ctMapT:'공장 평면 · 디지털 트윈',ctVitalsT:'현장 생체 신호 (합성 / 웨어러블)',ctWorker:'작업자',ctHr:'심박',ctTemp:'체온',ctBp:'혈압',ctLean:'기울기',ctHelmC:'안전모',ctStation:'구역',ctSeen:'최근 수신',ctQueueT:'경보 대기열',ctLogT:'지시 기록',ctLogSub:'현장 확인 대기 중',ctEmptyLog:'지시 내역이 없습니다',ctEmpty:'미처리 경보가 없습니다',ctPrivacyB:'구조화 데이터만 수신',ctPrivacy:'좌표 · 생체 신호 · 경보. 원본 영상은 엣지를 떠나지 않습니다 · 신원 미식별 · 전문가가 검토합니다',ctDemo:'데모 / 현장 데이터 · 칭윈대 백엔드에 동기화되지 않음 · 의료 진단 아님',ctHelmYes:'안전모 · 착용',ctHelmNo:'안전모 · 미착용',ctHelmUnk:'안전모 · 미검증 (미통과)',ctZone:'위험 구역',ctTrail:'궤적 = 최근 이동',ctRisk:'현장 위험도',ctAck:'접수',ctAcked:'접수됨',ctInstruct:'지시',ctCmdPh:'지시 내용 입력…',ctCmdSend:'지시 전송',ctCmdSent:'지시 전송됨',ctWaitAck:'현장 회신 대기',ctRecv:'현장 확인 완료',ctZoneK:'구역 진입',ctFallK:'낙상 의심',ctHelmetK:'안전모 미착용',ctLeanK:'자세 부하',ctManualK:'수동 보고',ctSt1:'프레스',ctSt2:'조립',ctSt3:'회복 훈련 구역',ctSt4:'운반 통로',ctOff:'오프라인',ctOn:'온라인',ctDemoTag:'합성 데이터',ctNoVitals:'생체 데이터 없음',ctLang:'KO'}
 };
+Object.assign(I.zh,{ctMetricWorkers:'现场在线人数',ctMetricAlerts:'待确认告警',ctMetricAlertsNote:'当前页面收到',ctMetricRisk:'现场风险参考',ctMetricRiskNote:'以边缘端上报为准',ctMetricFresh:'最近收到数据',ctMetricLocal:'浏览器 / 本地中继',ctWaitingEdge:'等待现场连接',ctWaitData:'等待数据',ctViewAll:'人员 + 厂区',ctViewPeople:'人员视图',ctViewFloor:'厂区平面'});
+Object.assign(I.en,{ctMetricWorkers:'Workers online',ctMetricAlerts:'Open alerts',ctMetricAlertsNote:'Received by this page',ctMetricRisk:'Site risk reference',ctMetricRiskNote:'As reported by the edge',ctMetricFresh:'Last data received',ctMetricLocal:'Browser / local relay',ctWaitingEdge:'Waiting for worksite',ctWaitData:'Waiting for data',ctViewAll:'People + floor',ctViewPeople:'People',ctViewFloor:'Floor plan'});
+Object.assign(I.ko,{ctMetricWorkers:'현장 작업자',ctMetricAlerts:'확인 대기 경보',ctMetricAlertsNote:'이 페이지에서 수신',ctMetricRisk:'현장 위험 참고값',ctMetricRiskNote:'엣지 보고 기준',ctMetricFresh:'최근 수신 데이터',ctMetricLocal:'브라우저 / 로컬 중계',ctWaitingEdge:'현장 연결 대기',ctWaitData:'데이터 대기 중',ctViewAll:'작업자 + 평면도',ctViewPeople:'작업자 보기',ctViewFloor:'평면도'});
+Object.assign(I.zh,{ctSkeleton:'姿态骨骼 · 关键点'});
+Object.assign(I.en,{ctSkeleton:'Pose skeleton · keypoints'});
+Object.assign(I.ko,{ctSkeleton:'자세 골격 · 주요 지점'});
+Object.assign(I.zh,{ctPrivacy:'坐标 · 骨骼关键点 · 体征 · 告警，原始视频不出边缘端 · 不识别身份 · 提示由专业人员复核'});
+Object.assign(I.en,{ctPrivacy:'coordinates · skeleton keypoints · vitals · alerts. Raw video stays at the edge · no identity recognition · professionals review prompts'});
+Object.assign(I.ko,{ctPrivacy:'좌표 · 골격 주요 지점 · 생체 신호 · 경보. 원본 영상은 엣지에만 유지 · 신원 인식 없음 · 전문가가 안내를 검토합니다'});
 const $=s=>document.querySelector(s),tr=k=>I[lang][k]||I.zh[k]||k;
 let lang='zh';try{lang=localStorage.getItem('ct_lang')||'zh'}catch(e){}
 const RELAY=new URLSearchParams(location.search).get('relay')==='1';
 const TW=window.SHKTwinLink;TW.init({role:'center',relay:RELAY});
 const STN={s1:'ctSt1',s2:'ctSt2',s3:'ctSt3',s4:'ctSt4'};
 const DEF_ST={s1:{x:.14,y:.16,w:.34,h:.36},s2:{x:.52,y:.16,w:.34,h:.36},s3:{x:.14,y:.58,w:.34,h:.34},s4:{x:.52,y:.58,w:.34,h:.34}};
+const POSE_LINKS=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[27,29],[27,31],[28,30],[28,32]];
 let ST=JSON.parse(JSON.stringify(DEF_ST)),ZN=null,risk=null,edgeName=null,edgeLast=0,edgeLang='zh';
+let twinView='all';
 const W={};                       // id -> {x,y,last,trail:[],hr,temp,spo2,bp,lean,helm,inZone,vlast}
 const INC=[];                     // {id,kind,level,station,text,time,src,acked,cmd:null|{text,sent,acked}}
 const LOG=[];                     // {ref,station,text,time,acked}
@@ -136,7 +192,7 @@ function chip(){const on=Date.now()-edgeLast<24000;$('#connChip').classList.togg
 TW.on(function(m){
  const d=m.data||{};
  if(m.type==='hello'){edgeLast=Date.now();edgeName=d.name||null;edgeLang=d.lang||'zh';risk=d.risk;if(d.stations&&d.stations.length){const st={};d.stations.forEach(function(s){if(s&&s.id&&s.x!=null)st[s.id]={id:s.id,name:s.name,x:+s.x,y:+s.y,w:+s.w,h:+s.h}});if(Object.keys(st).length)ST=st}ZN=d.zone||null;dirty=true;chip();}
- else if(m.type==='twin'){edgeLast=Date.now();ZN=d.zone||null;(d.people||[]).forEach(function(p){if(!p)return;const w=W[p.id]=W[p.id]||{id:p.id,x:.5,y:.5,last:0,trail:[],hr:null,temp:null,spo2:null,bp:null,lean:null,helm:null,inZone:false,vlast:0};w.x=+p.x||w.x;w.y=+p.y||w.y;w.lean=p.lean==null?w.lean:+p.lean;w.helm=p.helmet===undefined?w.helm:p.helmet;w.inZone=!!p.inZone;w.last=Date.now();w.trail.push({x:w.x,y:w.y,t:w.last});if(w.trail.length>40)w.trail.shift();});dirty=true;}
+ else if(m.type==='twin'){edgeLast=Date.now();ZN=d.zone||null;(d.people||[]).forEach(function(p){if(!p)return;const w=W[p.id]=W[p.id]||{id:p.id,x:.5,y:.5,last:0,trail:[],hr:null,temp:null,spo2:null,bp:null,lean:null,helm:null,inZone:false,vlast:0,pose:null};w.x=+p.x||w.x;w.y=+p.y||w.y;w.lean=p.lean==null?w.lean:+p.lean;w.helm=p.helmet===undefined?w.helm:p.helmet;w.pose=Array.isArray(p.pose)?p.pose:null;w.inZone=!!p.inZone;w.last=Date.now();w.trail.push({x:w.x,y:w.y,t:w.last});if(w.trail.length>40)w.trail.shift();});dirty=true;}
  else if(m.type==='vitals'){edgeLast=Date.now();(d.people||[]).forEach(function(p){if(!p)return;const w=W[p.id]=W[p.id]||{id:p.id,x:.5,y:.5,last:0,trail:[],hr:null,temp:null,spo2:null,bp:null,lean:null,helm:null,inZone:false,vlast:0};w.hr=p.hr==null?null:+p.hr;w.temp=p.temp==null?null:+p.temp;w.spo2=p.spo2==null?null:+p.spo2;w.bp=p.bp||null;w.vlast=Date.now();});dirty=true;}
  else if(m.type==='incident'){edgeLast=Date.now();if(!INC.some(x=>x.id===d.id)){INC.unshift({id:d.id,kind:d.kind||'manual',level:d.level||'warn',station:d.station||null,text:d.text||('['+d.kind+']'),time:d.time||new Date().toTimeString().slice(0,8),src:d.src||'edge',acked:false,cmd:null});if(INC.length>50)INC.length=50;if(d.station)PING.push({st:d.station,t:Date.now()});if(d.level==='high')beep();dirty=true;}}
  else if(m.type==='receipt'&&d.kind==='command'&&d.ref){const c=INC.find(x=>x.cmd&&x.cmd.sent&&x.id===d.ref);const l=LOG.find(x=>x.ref===d.ref);if(c&&c.cmd){c.cmd.acked=true}if(l){l.acked=true}dirty=true;}
@@ -147,20 +203,21 @@ function beep(){try{const o=new (window.AudioContext||window.webkitAudioContext)
 function draw(){
  const map=$('#map');if(!map)return;
  /* 工位块 */
- const stHtml=Object.keys(ST).map(id=>{const s=ST[id];return `<div class="st" style="left:${s.x*100}%;top:${s.y*100}%;width:${s.w*100}%;height:${s.h*100}%">${stName(id)}<small>${id.toUpperCase()}</small></div>`}).join('');
+ const stHtml=twinView==='people'?'':Object.keys(ST).map(id=>{const s=ST[id];return `<div class="st" style="left:${s.x*100}%;top:${s.y*100}%;width:${s.w*100}%;height:${s.h*100}%">${stName(id)}<small>${id.toUpperCase()}</small></div>`}).join('');
  /* 工人点 */
  const now=Date.now();
- const wdHtml=Object.keys(W).map(id=>{const w=W[id],off=now-w.last>15000;
+ const wdHtml=twinView==='floor'?'':Object.keys(W).map(id=>{const w=W[id],off=now-w.last>15000;
   const cls=['wd'];if(off)cls.push('off');
   const ring=['ring'];if(!off){if(w.helm==='yes')ring.push('g');else if(w.helm==='no')ring.push('r');if(w.inZone)ring.push('z');if(PING.some(p=>p.st&&stOf(w.x,w.y)===p.st&&now-p.t<6000))ring.push('fl')}
   return `<div class="${cls.join(' ')}" style="left:${w.x*100}%;top:${w.y*100}%"><div class="${ring.join(' ')}"><div class="dot"></div></div><span class="wl">${w.id}</span></div>`}).join('');
- const zoneRect=ZN?`<rect x="${ZN.x*100}%" y="${ZN.y*100}%" width="${ZN.w*100}%" height="${ZN.h*100}%" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6 4"/>`:'';
- const trails=Object.keys(W).map(id=>{const w=W[id];if(w.trail.length<2)return'';const pts=w.trail.map(p=>`${(p.x*100).toFixed(2)},${(p.y*100).toFixed(2)}`).join(' ');return `<polyline points="${pts}" fill="none" stroke="#38bdf855" stroke-width="1.5" stroke-linecap="round"/>`}).join('');
- const pings=PING.filter(p=>now-p.t<6000).map(p=>{const s=ST[p.st];if(!s)return'';return `<circle cx="${(s.x+s.w/2)*100}%" cy="${(s.y+s.h/2)*100}%" r="9" fill="none" stroke="#ef4444" stroke-width="2"><animate attributeName="r" values="6;14" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite"/></circle>`}).join('');
+ const zoneRect=twinView==='people'||!ZN?'':`<rect x="${ZN.x*100}%" y="${ZN.y*100}%" width="${ZN.w*100}%" height="${ZN.h*100}%" fill="rgba(239,68,68,.08)" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6 4"/>`;
+ const skeletons=twinView==='floor'?'':Object.keys(W).map(id=>{const w=W[id];if(!w.pose||w.pose.length<9)return'';const pts=new Map();for(let i=0;i+2<w.pose.length;i+=3)pts.set(w.pose[i],{x:w.pose[i+1],y:w.pose[i+2]});const a=pts.get(23),b=pts.get(24);if(!a||!b)return'';const rx=(a.x+b.x)/2,ry=(a.y+b.y)/2,xy=p=>({x:(w.x+(p.x-rx)*.28)*100,y:(w.y+(p.y-ry)*.28)*100});const lines=POSE_LINKS.map(([u,v])=>{const p=pts.get(u),q=pts.get(v);if(!p||!q)return'';const x=xy(p),y=xy(q);return `<line x1="${x.x.toFixed(2)}" y1="${x.y.toFixed(2)}" x2="${y.x.toFixed(2)}" y2="${y.y.toFixed(2)}"/>`}).join(''),joints=Array.from(pts.values()).map(p=>{const q=xy(p);return `<circle cx="${q.x.toFixed(2)}" cy="${q.y.toFixed(2)}" r=".65"/>`}).join('');return `<g fill="#fff" stroke="#087e76" stroke-width=".45" stroke-linecap="round" stroke-linejoin="round" opacity=".92">${lines}${joints}</g>`}).join('');
+ const trails=twinView==='floor'?'':Object.keys(W).map(id=>{const w=W[id];if(w.trail.length<2)return'';const pts=w.trail.map(p=>`${(p.x*100).toFixed(2)},${(p.y*100).toFixed(2)}`).join(' ');return `<polyline points="${pts}" fill="none" stroke="#38bdf855" stroke-width="1.5" stroke-linecap="round"/>`}).join('');
+ const pings=twinView==='people'?'':PING.filter(p=>now-p.t<6000).map(p=>{const s=ST[p.st];if(!s)return'';return `<circle cx="${(s.x+s.w/2)*100}%" cy="${(s.y+s.h/2)*100}%" r="9" fill="none" stroke="#ef4444" stroke-width="2"><animate attributeName="r" values="6;14" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite"/></circle>`}).join('');
  map.innerHTML=stHtml+wdHtml;
  /* svg 覆盖层 */
  let svg=$('#mapSvg');if(!svg){svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.id='mapSvg';svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');map.appendChild(svg)}
- svg.innerHTML=zoneRect+trails+pings;
+ svg.innerHTML=zoneRect+skeletons+trails+pings;
  /* 体征表 */
  const rows=Object.keys(W).sort().map(id=>{const w=W[id],off=now-w.last>15000;
   const fmt=v=>v==null?'—':v;
@@ -185,12 +242,18 @@ function draw(){
  $('#mapMeta').textContent=tr('ctRisk')+': '+(risk==null?'—':risk)+(edgeName?' · '+edgeName:'');
  const online=Object.keys(W).filter(id=>Date.now()-W[id].last<=15000).length;
  $('#vitMeta').textContent=online+' '+tr('ctOn')+' · '+tr('ctDemoTag');
+ $('#metricOnline').textContent=String(online);
+ $('#metricSource').textContent=edgeName||tr('ctWaitingEdge');
+ $('#metricAlerts').textContent=String(INC.filter(x=>!x.acked).length);
+ $('#metricRisk').textContent=risk==null?'—':String(risk);
+ $('#metricFresh').textContent=edgeLast?Math.max(0,Math.floor((now-edgeLast)/1000))+'s':tr('ctWaitData');
  dirty=false;
 }
 function rloop(){if(dirty)draw();requestAnimationFrame(rloop)}
 document.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.id==='langBtn'){lang=lang==='zh'?'en':lang==='en'?'ko':'zh';applyLang();return}
+ if(b.dataset.mapView){twinView=b.dataset.mapView;document.querySelectorAll('[data-map-view]').forEach(v=>{const selected=v.dataset.mapView===twinView;v.classList.toggle('on',selected);v.setAttribute('aria-pressed',selected)});dirty=true;return}
  const d=b.dataset;
  if(d.act==='ack'){const x=INC.find(v=>v.id===d.inc);if(x&&!x.acked){x.acked=true;TW.send('receipt',{ref:x.id,kind:'incident',text:tr('ctAcked')});notify('✓ '+tr('ctAcked')+' · '+x.id)}}
  else if(d.act==='cmd'){const x=INC.find(v=>v.id===d.inc);if(x){x.acked=true;x.cmd={text:'',sent:false,acked:false};TW.send('receipt',{ref:x.id,kind:'incident',text:tr('ctAcked')})}}
