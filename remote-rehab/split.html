@@ -2,37 +2,47 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="ReMotion-K _ 企业 · 庆云大学 分屏：企业现场边缘端 ⇄ 庆云大学数字孪生控制中心，结构化数据链路演示。">
+<meta name="description" content="ReMotion-K 企业现场分屏演示：摄像头本地分析与结构化现场数据，可视化传输至控制室；未接入庆云大学后台。">
 <title>ReMotion-K _ 企业 · 庆云大学 分屏</title>
 <style>
-:root{--bg:#070d17;--bar:#0d1a2e;--panel:#0e1626;--line:#1e2c44;--ink:#e8f0fb;--muted:#8fa2bd;--cy:#5fe1d0}
-*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Segoe UI","Microsoft Yahei","Malgun Gothic",sans-serif;display:flex;flex-direction:column;overflow:hidden}
-button{font:inherit;cursor:pointer;color:var(--ink);background:#16273f;border:1px solid #2a4166;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;white-space:nowrap}
-button.on{background:#38bdf826;border-color:#38bdf8;color:#7dd3fc}
-button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
-.bar{display:flex;align-items:center;gap:12px;padding:9px 14px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap;z-index:8}
+:root{--bg:#f2f5f9;--bar:#fff;--panel:#fff;--line:#d5dfeb;--ink:#17324c;--muted:#627991;--cy:#0b9b91;--navy:#0d2944}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Segoe UI","Microsoft Yahei","Malgun Gothic",sans-serif;display:flex;overflow:hidden}
+button{font:inherit;cursor:pointer;color:#274662;background:#fff;border:1px solid #cad7e5;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:700;white-space:nowrap}
+button.on{background:#0b978d;border-color:#0b978d;color:#fff}
+button:focus-visible,a:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.sidenav{width:88px;flex:0 0 88px;display:flex;flex-direction:column;align-items:center;gap:16px;padding:12px 8px;background:var(--navy);color:#eaf3fb}
+.nav-logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#29c9b8,#47a8eb);color:#07314a;font-size:20px;font-weight:900;text-decoration:none}
+.nav-list{display:flex;flex-direction:column;gap:6px;width:100%}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 4px;border:1px solid transparent;border-radius:10px;color:#bdcddd;text-decoration:none;text-align:center;font-size:10px;line-height:1.2}
+.nav-item i{font-style:normal;font-size:17px}
+.nav-item:hover,.nav-item.active{color:#087f78;background:#e4f6f3;border-color:#a4e2db}
+.workspace{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap;z-index:8;box-shadow:0 2px 6px #1939570a}
 .brand{display:flex;align-items:center;gap:10px;min-width:0}
-.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#5fe1d0,#38bdf8);color:#07101f;display:grid;place-items:center;font-weight:900;font-size:16px;flex:0 0 auto}
+.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#32cbb8,#43a9e8);color:#07314a;display:grid;place-items:center;font-weight:900;font-size:16px;flex:0 0 auto}
 .brand b{display:block;font-size:14px;letter-spacing:.3px;white-space:nowrap}
 .brand small{display:block;color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.flowchip{display:inline-flex;gap:10px;align-items:center;border:1px solid #22c55e55;background:#0f2a1e66;border-radius:9px;padding:5px 10px;font-size:10px;color:#86efac;font-variant-numeric:tabular-nums;white-space:nowrap}
-.flowchip i{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px #22c55e22;animation:blink 1.6s ease-in-out infinite}
+.flowchip{display:inline-flex;gap:8px;align-items:center;border:1px solid #95dec2;background:#effbf5;border-radius:9px;padding:6px 10px;font-size:10px;color:#147c54;font-variant-numeric:tabular-nums;white-space:nowrap}
+.flowchip i{width:7px;height:7px;border-radius:50%;background:#22ad70;box-shadow:0 0 0 3px #22ad7022;animation:blink 1.6s ease-in-out infinite}
+.backend-status{display:inline-flex;align-items:center;gap:7px;border:1px solid #f1d59d;background:#fff8e9;color:#95600b;border-radius:9px;padding:6px 10px;font-size:10px;font-weight:700;white-space:nowrap}
+.backend-status i{width:7px;height:7px;border-radius:50%;background:#f59e0b;flex:0 0 auto}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
 .spacer{flex:1}
-.seg{display:flex;border:1px solid #2a4166;border-radius:8px;overflow:hidden}
-.seg button{border:0;border-radius:0;background:#16273f}
-.seg button+button{border-left:1px solid #2a4166}
-.swapbtn{background:#a78bfa22;border-color:#a78bfa88;color:#c4b5fd}
+.seg{display:flex;border:1px solid #cad7e5;border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:#fff}
+.seg button+button{border-left:1px solid #cad7e5}
+.swapbtn{background:#f5f1ff;border-color:#cfc1f4;color:#66529a}
 .langbtn{width:38px}
 .splitwrap{flex:1;position:relative;min-height:0}
 .canvas-wrap{position:absolute;inset:0;pointer-events:none;z-index:6}
 .canvas-wrap canvas{width:100%;height:100%;display:block}
 .split{position:absolute;inset:0;display:flex;z-index:2}
-.split .pane{position:relative;min-width:0;min-height:0;overflow:hidden;background:#0a1424}
-.split iframe{width:100%;height:100%;border:0;display:block;background:#fff}
-.pane-tag{position:absolute;top:10px;left:12px;z-index:7;pointer-events:none;background:#0d1a2ecc;border:1px solid #2a4166;border-radius:8px;padding:4px 10px;font-size:10px;font-weight:800;color:#bcd0e8}
-.pane-tag i{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;background:#5fe1d0}
-.pane-b .pane-tag i{background:#a78bfa}
+.split .pane{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:#f7f9fc}
+.pane-head{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;border-bottom:1px solid #d5dfeb;background:#e5f6f4;color:#087e76}
+.pane-b .pane-head{background:#edf1fb;color:#514c9c}
+.pane-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;font-weight:800}
+.pane-open{flex:0 0 auto;color:#086fba;font-size:10px;font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.split iframe{width:100%;height:100%;min-height:0;flex:1;border:0;display:block;background:#fff}
 /* 左右布局：比例作用在"面板"上，iframe 只负责填满面板 */
 .split.cols{flex-direction:row}
 .split.cols #pa{flex:0 0 calc(var(--ra,.5)*100% - 6px);order:1}
@@ -46,26 +56,38 @@ button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
 /* 交换：不移动 iframe DOM，只换面板视觉顺序（摄像头不丢） */
 .split.swap.cols #pa{order:3}.split.swap.cols #pb{order:1}
 .split.swap.rows #pa{order:3}.split.swap.rows #pb{order:1}
-.div{background:linear-gradient(90deg,#1e2c44,#2f4a70 50%,#1e2c44);background-size:200% 100%;animation:divglow 3s linear infinite;position:relative;z-index:9;display:flex;align-items:center;justify-content:center}
-.rows .div{background:linear-gradient(180deg,#1e2c44,#2f4a70 50%,#1e2c44);background-size:100% 200%}
+.div{background:linear-gradient(90deg,#dce5ef,#b8cadb 50%,#dce5ef);background-size:200% 100%;animation:divglow 3s linear infinite;position:relative;z-index:9;display:flex;align-items:center;justify-content:center}
+.rows .div{background:linear-gradient(180deg,#dce5ef,#b8cadb 50%,#dce5ef);background-size:100% 200%}
 @keyframes divglow{0%{background-position:0 0}100%{background-position:200% 0}}
 .rows .div{animation-name:divglowV}@keyframes divglowV{0%{background-position:0 0}100%{background-position:0 200%}}
-.div:after{content:"⦿";color:#5fe1d0;font-size:11px;text-shadow:0 0 8px #5fe1d0;position:relative;z-index:1}
+.div:after{content:"⦿";color:#159b90;font-size:11px;text-shadow:0 0 8px #49cdbd;position:relative;z-index:1}
 .hint{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:7px 14px;background:var(--bar);border-top:1px solid var(--line);font-size:10px;color:var(--muted);z-index:8}
 .hint .lg{display:inline-flex;align-items:center;gap:6px}
 .hint i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.hint b{color:#a9bdd6;font-weight:600}
-.hint .note{margin-left:auto;color:#7b8fa8}
-@media(max-width:760px){.brand small{display:none}.flowchip{order:9;width:100%}.hint .note{margin-left:0}}
+ .hint b{color:#365774;font-weight:700}
+.hint .note{margin-left:auto;color:#607991}
+@media(max-width:1050px){.brand{flex:1 1 270px}.bar .spacer{display:none}.flowchip{order:2}.backend-status{order:3}.bar .seg,.bar .swapbtn,.langbtn{order:4}}
+@media(max-width:760px){.sidenav{display:none}.brand small{display:none}.bar{gap:7px;padding:7px 9px}.brand{flex:1 1 190px}.flowchip{order:8;width:100%;overflow:hidden}.backend-status{order:2}.bar .spacer{display:block}.bar .seg,.bar .swapbtn,.langbtn{order:3}.hint{gap:8px;padding:6px 9px}.hint .note{margin-left:0}}
 @media print{.bar,.hint,.canvas-wrap,.div:after{display:none}}
 </style>
 </head>
 <body>
+<aside class="sidenav">
+ <a class="nav-logo" href="index.html" aria-label="ReMotion home">R</a>
+ <nav class="nav-list" aria-label="页面导航">
+  <a class="nav-item active" href="split.html"><i>▤</i><span data-i="spNavSplit">分屏</span></a>
+  <a class="nav-item" href="index.html?edge=1"><i>⌂</i><span data-i="spNavEdge">企业现场</span></a>
+  <a class="nav-item" href="center-twin.html"><i>◎</i><span data-i="spNavCenter">控制中心</span></a>
+  <a class="nav-item" href="index.html"><i>⌂</i><span data-i="spNavHome">首页</span></a>
+ </nav>
+</aside>
+<div class="workspace">
 <div class="bar">
- <div class="brand"><div class="mark">R</div><div><b data-i="spTitle">ReMotion-K _ 企业 · 庆云大学 分屏</b><small data-i="spSub">企业现场边缘端 ⇄ 庆云大学数字孪生控制中心 · 结构化数据链路演示</small></div></div>
- <span class="flowchip" id="flowChip"><i></i><span id="flowTxt">⤳ 0 pkt/s · 0 KB/s · A→B 0 · B→A 0</span></span>
+ <div class="brand"><div class="mark">R</div><div><b data-i="spTitle">ReMotion-K _ 企业 · 庆云大学 分屏</b><small data-i="spSub">企业现场边缘端 ⇄ 庆云大学数字孪生控制中心 · 当前未接入庆云大学后台</small></div></div>
+ <span class="backend-status" role="status"><i></i><span data-i="spBackendOffline">庆云大学后台：未接入</span></span>
+ <span class="flowchip" id="flowChip"><i></i><span id="flowTxt">⤳ 0 pkt/s · 0 KB/s · A→B 0 · B→A 0 · video 0 B</span></span>
  <div class="spacer"></div>
- <div class="seg" role="group" aria-label="connection"><button id="mDemo" data-i="spModeDemo">演示</button><button id="mRelay" data-i="spModeRelay">中继</button></div>
+ <div class="seg" role="group" aria-label="connection"><button id="mDemo" data-i="spModeDemo">浏览器演示</button><button id="mRelay" data-i="spModeRelay">本地中继</button></div>
  <div class="seg" role="group" aria-label="layout"><button id="lCols" data-i="spLayCols">左右</button><button id="lRows" data-i="spLayRows">上下</button></div>
  <div class="seg" role="group" aria-label="ratio"><button data-ra=".5">50/50</button><button data-ra=".4">40/60</button><button data-ra=".6">60/40</button><button data-ra=".3">30/70</button><button data-ra=".7">70/30</button></div>
  <button class="swapbtn" id="swapBtn" data-i="spSwap">⇄ 交换</button>
@@ -73,19 +95,21 @@ button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
 </div>
 <div class="splitwrap">
  <div class="split cols" id="split" style="--ra:.5">
-  <div class="pane pane-a" id="pa"><span class="pane-tag"><i></i><span data-i="spPaneA">企业现场 · ReMotion 边缘 AI</span></span><iframe id="fa" title="企业现场边缘端" allow="camera *; bluetooth *; serial *; screen-wake-lock *; fullscreen *"></iframe></div>
+  <div class="pane pane-a" id="pa"><div class="pane-head"><span class="pane-title" data-i="spPaneA">① 企业现场 · 摄像头与边缘 AI</span><a class="pane-open" id="openA" target="_blank" rel="noopener noreferrer" href="index.html?edge=1" data-i="spOpen">新窗口 ↗</a></div><iframe id="fa" title="企业现场边缘端" allow="camera *; bluetooth *; serial *; screen-wake-lock *; fullscreen *"></iframe></div>
   <div class="div" id="div" role="separator" aria-orientation="vertical" tabindex="0" title="拖动分隔条调整比例"></div>
-  <div class="pane pane-b" id="pb"><span class="pane-tag"><i></i><span data-i="spPaneB">庆云大学控制中心 · 数字孪生</span></span><iframe id="fb" title="庆云大学控制中心" allow="camera *; bluetooth *; serial *; screen-wake-lock *; fullscreen *"></iframe></div>
+  <div class="pane pane-b" id="pb"><div class="pane-head"><span class="pane-title" data-i="spPaneB">② 庆云大学控制中心 · 实时数字孪生</span><a class="pane-open" id="openB" target="_blank" rel="noopener noreferrer" href="center-twin.html" data-i="spOpen">新窗口 ↗</a></div><iframe id="fb" title="庆云大学控制中心" allow="camera *; bluetooth *; serial *; screen-wake-lock *; fullscreen *"></iframe></div>
  </div>
  <div class="canvas-wrap"><canvas id="cv"></canvas></div>
 </div>
 <div class="hint">
+ <span class="lg"><b data-i="spHow">左侧现场 · 右侧控制中心</b><span data-i="spHowText">结构化数据通过浏览器链路传输；摄像头视频只留在现场端。</span></span>
  <span class="lg"><i style="background:#38bdf8"></i><b data-i="spH1">twin</b><span data-i="spH1d">姿态坐标 · 5Hz</span></span>
  <span class="lg"><i style="background:#22c55e"></i><b data-i="spH2">vitals</b><span data-i="spH2d">生命体征 · 1Hz</span></span>
  <span class="lg"><i style="background:#ef4444"></i><b data-i="spH3">incident</b><span data-i="spH3d">现场告警</span></span>
  <span class="lg"><i style="background:#a78bfa"></i><b data-i="spH4">hello</b><span data-i="spH4d">心跳 · 工位布局</span></span>
  <span class="lg"><i style="background:#f59e0b"></i><b data-i="spH5">指示 / 签收</b><span data-i="spH5d">中心指示 · 回执</span></span>
- <span class="note" data-i="spNote">结构化数据演示 · 视频不出边缘端 · 无医疗诊断</span>
+ <span class="note" data-i="spNote">仅本地演示 / 中继 · 数据不会保存到庆云大学后台 · 视频不出边缘端 · 无医疗诊断</span>
+</div>
 </div>
 <script>
 'use strict';
@@ -94,10 +118,13 @@ button:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
  *       BroadcastChannel('shinek-twin') 仅用于观察画布动画（server 模式跨文档，file:// 下不可用）
  * 防环: 只转 postMessage 路径、只转给非源 iframe、from:seq 去重；twin-link 只派发不转发。 */
 const I={
-zh:{spTitle:'ReMotion-K _ 企业 · 庆云大学 分屏',spSub:'企业现场边缘端 ⇄ 庆云大学数字孪生控制中心 · 结构化数据链路演示',spModeDemo:'演示',spModeRelay:'中继',spLayCols:'左右',spLayRows:'上下',spSwap:'⇄ 交换',spPaneA:'企业现场 · ReMotion 边缘 AI',spPaneB:'庆云大学控制中心 · 数字孪生',spH1:'twin',spH1d:'姿态坐标 · 5Hz',spH2:'vitals',spH2d:'生命体征 · 1Hz',spH3:'incident',spH3d:'现场告警',spH4:'hello',spH4d:'心跳 · 工位布局',spH5:'指示 / 签收',spH5d:'中心指示 · 回执',spNote:'结构化数据演示 · 视频不出边缘端 · 无医疗诊断',spRelayConfirm:'中继模式需要先运行 python3 server.py，再从 http://localhost:8000/split.html 打开本页（两台电脑可用局域网 IP 互连）。仍要切换吗？',spLblIncident:'告警',spLblCommand:'指示',spLang:'中'},
-en:{spTitle:'ReMotion-K _ Worksite · Kyungwoon Univ. split',spSub:'Worksite edge ⇄ Kyungwoon digital-twin control center · structured data link demo',spModeDemo:'DEMO',spModeRelay:'RELAY',spLayCols:'SIDE',spLayRows:'STACK',spSwap:'⇄ SWAP',spPaneA:'Worksite · ReMotion edge AI',spPaneB:'Kyungwoon control center · digital twin',spH1:'twin',spH1d:'pose coordinates · 5Hz',spH2:'vitals',spH2d:'vital signs · 1Hz',spH3:'incident',spH3d:'site alerts',spH4:'hello',spH4d:'heartbeat · floor layout',spH5:'instruct / receipt',spH5d:'center instructions · replies',spNote:'Structured data demo · video never leaves the edge · no medical diagnosis',spRelayConfirm:'Relay mode needs python3 server.py first: run it, then open http://localhost:8000/split.html (another PC can connect via the LAN IP). Switch anyway?',spLblIncident:'ALERT',spLblCommand:'CMD',spLang:'EN'},
-ko:{spTitle:'ReMotion-K _ 작업 현장 · 경운대 분할 화면',spSub:'작업 현장 엣지 ⇄ 경운대 디지털 트윈 관제센터 · 구조화 데이터 링크 데모',spModeDemo:'데모',spModeRelay:'중계',spLayCols:'좌우',spLayRows:'상하',spSwap:'⇄ 바꾸기',spPaneA:'작업 현장 · ReMotion 엣지 AI',spPaneB:'경운대 관제센터 · 디지털 트윈',spH1:'twin',spH1d:'자세 좌표 · 5Hz',spH2:'vitals',spH2d:'생체 신호 · 1Hz',spH3:'incident',spH3d:'현장 경보',spH4:'hello',spH4d:'하트비트 · 공장 배치',spH5:'지시 / 접수',spH5d:'센터 지시 · 회신',spNote:'구조화 데이터 데모 · 영상은 엣지를 떠나지 않음 · 의료 진단 아님',spRelayConfirm:'중계 모드는 먼저 python3 server.py 를 실행한 뒤 http://localhost:8000/split.html 로 열어야 합니다(다른 PC는 LAN IP로 접속). 그래도 전환할까요?',spLblIncident:'경보',spLblCommand:'지시',spLang:'KO'}
+zh:{spTitle:'ReMotion-K _ 企业 · 庆云大学 分屏',spSub:'企业现场边缘端 ⇄ 庆云大学数字孪生控制中心 · 当前未接入庆云大学后台',spBackendOffline:'庆云大学后台：未接入',spModeDemo:'演示',spModeRelay:'本地中继',spLayCols:'左右',spLayRows:'上下',spSwap:'⇄ 交换',spPaneA:'企业现场 · ReMotion 边缘 AI',spPaneB:'庆云大学控制中心 · 数字孪生',spH1:'twin',spH1d:'姿态坐标 · 5Hz',spH2:'vitals',spH2d:'生命体征 · 1Hz',spH3:'incident',spH3d:'现场告警',spH4:'hello',spH4d:'心跳 · 工位布局',spH5:'指示 / 签收',spH5d:'中心指示 · 回执',spNote:'仅本地演示 / 中继 · 数据不会保存到庆云大学后台 · 视频不出边缘端 · 无医疗诊断',spRelayConfirm:'本地中继需要先运行 python3 server.py，再从 http://localhost:8000/split.html 打开本页（两台电脑可用局域网 IP 互连）。这不是庆云大学后台连接。仍要切换吗？',spLblIncident:'告警',spLblCommand:'指示',spLang:'中'},
+en:{spTitle:'ReMotion-K _ Worksite · Qingyun Univ. split',spSub:'Worksite edge ⇄ Qingyun digital-twin control center · Qingyun backend not connected',spBackendOffline:'Qingyun backend: not connected',spModeDemo:'DEMO',spModeRelay:'LOCAL RELAY',spLayCols:'SIDE',spLayRows:'STACK',spSwap:'⇄ SWAP',spPaneA:'Worksite · ReMotion edge AI',spPaneB:'Qingyun control center · digital twin',spH1:'twin',spH1d:'pose coordinates · 5Hz',spH2:'vitals',spH2d:'vital signs · 1Hz',spH3:'incident',spH3d:'site alerts',spH4:'hello',spH4d:'heartbeat · floor layout',spH5:'instruct / receipt',spH5d:'center instructions · replies',spNote:'Local demo / relay only · data is not saved to Qingyun backend · video stays at edge · no medical diagnosis',spRelayConfirm:'Local relay requires python3 server.py, then open http://localhost:8000/split.html (another PC can connect via the LAN IP). This does not connect to the Qingyun backend. Switch anyway?',spLblIncident:'ALERT',spLblCommand:'CMD',spLang:'EN'},
+ko:{spTitle:'ReMotion-K _ 작업 현장 · 칭윈대 분할 화면',spSub:'작업 현장 엣지 ⇄ 칭윈대 디지털 트윈 관제센터 · 칭윈대 백엔드 미연결',spBackendOffline:'칭윈대 백엔드: 미연결',spModeDemo:'데모',spModeRelay:'로컬 중계',spLayCols:'좌우',spLayRows:'상하',spSwap:'⇄ 바꾸기',spPaneA:'작업 현장 · ReMotion 엣지 AI',spPaneB:'칭윈대 관제센터 · 디지털 트윈',spH1:'twin',spH1d:'자세 좌표 · 5Hz',spH2:'vitals',spH2d:'생체 신호 · 1Hz',spH3:'incident',spH3d:'현장 경보',spH4:'hello',spH4d:'하트비트 · 공장 배치',spH5:'지시 / 접수',spH5d:'관제 지시 · 회신',spNote:'로컬 데모 / 중계 전용 · 데이터는 칭윈대 백엔드에 저장되지 않음 · 영상은 엣지에만 유지 · 의료 진단 아님',spRelayConfirm:'로컬 중계는 먼저 python3 server.py를 실행하고 http://localhost:8000/split.html을 열어야 합니다(다른 PC는 LAN IP로 접속). 칭윈대 백엔드에 연결되는 기능은 아닙니다. 전환할까요?',spLblIncident:'경보',spLblCommand:'지시',spLang:'KO'}
 };
+Object.assign(I.zh,{spNavSplit:'分屏',spNavEdge:'企业现场',spNavCenter:'控制中心',spNavHome:'首页',spModeDemo:'浏览器演示',spModeRelay:'本地中继',spSub:'摄像头本地分析 + 手表信号演示 → 庆云大学控制室 · 后台未接入',spPaneA:'① 企业现场 · 摄像头 + YOLO + 手表信号演示',spPaneB:'② 庆云大学控制中心 · 实时数字孪生',spOpen:'新窗口 ↗',spHow:'现场上报 · 控制室回传',spHowText:'坐标/骨骼关键点/护具、心率/体温/血压、告警/现场处置；控制室签收、指令与回执双向传输。视频 0 B。',spVideoNone:'视频 0 B',spNote:'浏览器演示 / 本地中继 · 体征为合成演示值，数据不会保存到后台 · 原始视频不传输 · 无医疗诊断',spFlowEdge:'企业→庆云',spFlowCenter:'庆云→企业'});
+Object.assign(I.en,{spNavSplit:'Split view',spNavEdge:'Worksite',spNavCenter:'Control room',spNavHome:'Home',spModeDemo:'BROWSER DEMO',spModeRelay:'LOCAL RELAY',spSub:'Local camera analysis + wearable-signal demo → Qingyun control room · backend not connected',spPaneA:'① Worksite · camera + YOLO + wearable-signal demo',spPaneB:'② Qingyun control room · live digital twin',spOpen:'Open in new window ↗',spHow:'Worksite reports · control room replies',spHowText:'Coordinates/skeleton keypoints/PPE, HR/temperature/BP, alerts/site actions; acknowledgments, instructions, and receipts return to the worksite. Video 0 B.',spVideoNone:'video 0 B',spNote:'Browser demo / local relay · vital signs are synthetic demo values and are not saved to a backend · no video is transmitted · no medical diagnosis',spFlowEdge:'Worksite→Qingyun',spFlowCenter:'Qingyun→worksite'});
+Object.assign(I.ko,{spNavSplit:'분할 화면',spNavEdge:'작업 현장',spNavCenter:'관제센터',spNavHome:'홈',spModeDemo:'브라우저 데모',spModeRelay:'로컬 중계',spSub:'카메라 로컬 분석 + 워치 신호 데모 → 칭윈대 관제센터 · 백엔드 미연결',spPaneA:'① 작업 현장 · 카메라 + YOLO + 워치 신호 데모',spPaneB:'② 칭윈대 관제센터 · 실시간 디지털 트윈',spOpen:'새 창에서 열기 ↗',spHow:'현장 전송 · 관제 회신',spHowText:'좌표/골격 주요 지점/PPE, 심박/체온/혈압, 경보/현장 조치; 관제 접수·지시·회신은 현장으로 돌아갑니다. 영상 0 B.',spVideoNone:'영상 0 B',spNote:'브라우저 데모 / 로컬 중계 · 생체 수치는 합성 데모이며 백엔드에 저장되지 않음 · 영상 전송 없음 · 의료 진단 아님',spFlowEdge:'현장→칭윈대',spFlowCenter:'칭윈대→현장'});
 const $=s=>document.querySelector(s),tr=k=>I[lang][k]||I.zh[k]||k;
 const LS={g:k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let lang='zh';
@@ -116,8 +143,9 @@ const stats={a2b:0,b2a:0,ba2b:0,bb2a:0,win:[]};
 
 function save(){LS.s('rm_split',{mode:state.mode,layout:state.layout})}
 function applyLang(){document.querySelectorAll('[data-i]').forEach(n=>{n.textContent=tr(n.dataset.i)});$('#langBtn').textContent=tr('spLang')}
-function applyMode(){const m=MODES[state.mode];const a=m.a,b=m.b;if(fa.getAttribute('src')!==a)fa.src=a;if(fb.getAttribute('src')!==b)fb.src=b;$('#mDemo').classList.toggle('on',state.mode==='demo');$('#mRelay').classList.toggle('on',state.mode==='relay');}
-function applyLayout(){split.className='split '+state.layout+(state.swap?' swap':'');split.style.setProperty('--ra',state.ra);div.setAttribute('aria-orientation',state.layout==='cols'?'vertical':'horizontal');$('#lCols').classList.toggle('on',state.layout==='cols');$('#lRows').classList.toggle('on',state.layout==='rows');document.querySelectorAll('[data-ra]').forEach(b=>b.classList.toggle('on',+b.dataset.ra===state.ra));resize();}
+function applyMode(){const m=MODES[state.mode];const a=m.a,b=m.b;if(fa.getAttribute('src')!==a)fa.src=a;if(fb.getAttribute('src')!==b)fb.src=b;$('#openA').href=a;$('#openB').href=b;$('#mDemo').classList.toggle('on',state.mode==='demo');$('#mRelay').classList.toggle('on',state.mode==='relay');$('#mDemo').setAttribute('aria-pressed',state.mode==='demo');$('#mRelay').setAttribute('aria-pressed',state.mode==='relay');}
+function syncRatios(){document.querySelectorAll('[data-ra]').forEach(b=>{const selected=+b.dataset.ra===state.ra;b.classList.toggle('on',selected);b.setAttribute('aria-pressed',selected)})}
+function applyLayout(){split.className='split '+state.layout+(state.swap?' swap':'');split.style.setProperty('--ra',state.ra);div.setAttribute('aria-orientation',state.layout==='cols'?'vertical':'horizontal');$('#lCols').classList.toggle('on',state.layout==='cols');$('#lRows').classList.toggle('on',state.layout==='rows');$('#lCols').setAttribute('aria-pressed',state.layout==='cols');$('#lRows').setAttribute('aria-pressed',state.layout==='rows');syncRatios();resize();}
 function edgeFirst(){return !state.swap}   /* 边缘端是否在左/上 */
 
 /* ---- 数据包观察与转发（防环三重：只转 postMessage 路径 / 只转非源 / from:seq 去重） ---- */
@@ -173,16 +201,16 @@ function frame(now){
  requestAnimationFrame(frame);
 }
 /* 流量芯片（4s 滑窗，500ms 刷新） */
-setInterval(()=>{const now=performance.now();const w=stats.win.filter(x=>now-x.t<4000);const pps=(w.length/4).toFixed(1),kbps=(w.reduce((s,x)=>s+x.bytes,0)/4/1024).toFixed(1);$('#flowTxt').textContent='⤳ '+pps+' pkt/s · '+kbps+' KB/s · A→B '+stats.a2b+' · B→A '+stats.b2a},500);
+setInterval(()=>{const now=performance.now();const w=stats.win.filter(x=>now-x.t<4000);const pps=(w.length/4).toFixed(1),kbps=(w.reduce((s,x)=>s+x.bytes,0)/4/1024).toFixed(1);$('#flowTxt').textContent='⤳ '+pps+' pkt/s · '+kbps+' KB/s · '+tr('spFlowEdge')+' '+stats.a2b+' · '+tr('spFlowCenter')+' '+stats.b2a+' · '+tr('spVideoNone')},500);
 
 /* ---- 分隔条 ---- */
 let dragOn=false;
 function raFrom(e){const r=split.getBoundingClientRect();let v=state.layout==='cols'?(e.clientX-r.left)/r.width:(e.clientY-r.top)/r.height;return Math.min(.75,Math.max(.25,v))}
 div.addEventListener('pointerdown',e=>{dragOn=true;div.setPointerCapture(e.pointerId)});
 div.addEventListener('pointermove',e=>{if(!dragOn)return;state.ra=+raFrom(e).toFixed(2);split.style.setProperty('--ra',state.ra)});
-div.addEventListener('pointerup',e=>{if(dragOn){dragOn=false;save();document.querySelectorAll('[data-ra]').forEach(b=>b.classList.toggle('on',+b.dataset.ra===state.ra))}});
+div.addEventListener('pointerup',e=>{if(dragOn){dragOn=false;save();syncRatios()}});
 div.addEventListener('dblclick',()=>{state.ra=.5;applyLayout();save()});
-div.addEventListener('keydown',e=>{const d=e.key==='ArrowLeft'||e.key==='ArrowUp'?-0.02:e.key==='ArrowRight'||e.key==='ArrowDown'?0.02:0;if(d){e.preventDefault();state.ra=+Math.min(.75,Math.max(.25,state.ra+d)).toFixed(2);split.style.setProperty('--ra',state.ra);save()}});
+div.addEventListener('keydown',e=>{const d=e.key==='ArrowLeft'||e.key==='ArrowUp'?-0.02:e.key==='ArrowRight'||e.key==='ArrowDown'?0.02:0;if(d){e.preventDefault();state.ra=+Math.min(.75,Math.max(.25,state.ra+d)).toFixed(2);split.style.setProperty('--ra',state.ra);syncRatios();save()}});
 
 /* ---- 控件 ---- */
 $('#mDemo').onclick=()=>{state.mode='demo';applyMode();save()};
